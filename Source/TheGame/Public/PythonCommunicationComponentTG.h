@@ -43,7 +43,7 @@ private:
 	void EndServer();
 	void HandleData();
 	void HandleConnection();
-	void SendMessage(const DroneTrainerCommTG::Message& Message);
+	void SendMessage(DroneTrainerCommTG::Message& Message);
 
 	void ConnectToServer();
 	void EndConnection();
@@ -51,15 +51,13 @@ private:
 	FSocket* ReceivingSocket;
 	FSocket* SendingSocket;
 	FTimerHandle TickTimerHandle;
-
+	TArray<DroneTrainerCommTG::Signal> CurrentSignalsBuffer;
+	
 	UPROPERTY(EditAnywhere)
-	int32 ReceivingPort = 7777;
-
-	UPROPERTY(EditAnywhere)
-	int32 SendingPort = 7776;
+	int32 ServerPort = 7777;
 
 	static DroneTrainerCommTG::RegId CurrRegisterId;
 	bool bShouldHandleData = true;
 	bool bShouldSendData = false;
-	
+	bool isRegistered = false;
 };

@@ -10,7 +10,17 @@ from queue import Queue
 
 from ..logger import logger
 from ..signal_handler import *
+from .message import *
 
+
+@dataclass(init=True, eq=True)
+class Client:
+    reg_id: int = 0
+    connection: st.socket = st.socket
+    address: str = ""
+    registered: bool = False
+    message_to_send: Message = Message
+    
 
 class UE5Server:
     def __init__(self):
@@ -19,15 +29,14 @@ class UE5Server:
         self.receiving_queue = Queue()
         self.connected_clients = {}
         self.message_to_send = "Server's message"
-        self.response_message = "Server's response"
         self._sending_thread = Thread()
         self._receiving_thread = Thread()
         self._connection_thread = Thread()
-        self._listener_port = 7777
-        self._sending_port = 7776
+        self._listening_port = 7777
         self._max_clients = 10
         self._server_socket = st.socket()
-        self._conn = None
+        self._connections = []
+        self._connection = None
         self._address = None
         self._mutex = Lock()
 
@@ -46,10 +55,8 @@ class UE5Server:
         self.run = True
         
         # bind host address and port together
-        self._server_socket.bind(("127.0.0.1", self._listener_port))  
-        # self._server_socket.setblocking(False)
+        self._server_socket.bind(("127.0.0.1", self._listening_port))  
 
-        # conn, address = self._server_socket.accept()  # accept new connection
         self._connection_thread = Thread(target=self.__wait_for_connection, args=[])
         self._connection_thread.start()
         sleep(0.5)
@@ -65,9 +72,13 @@ class UE5Server:
             logger.info("Waiting for connection from clients...")
             # configure how many client the server can listen simultaneously
             self._server_socket.listen(self._max_clients)
-            self._conn, self._address = self._server_socket.accept()  # accept new connection
-            logger.info("Connection from: " + str(self._address))
+            client = Client()
+            client.connection, client.address = self._server_socket.accept()  # accept new connection
+            client.message_to_send = Message(0, msg_types["Server_response"], 1)
+            self._connections.append(client)
+            logger.info("Connection from: " + str(client.address))
             sleep(1)
+    
     
     @__lock_mutex
     def stop_server(self):
@@ -110,24 +121,29 @@ class UE5Server:
         logger.info("")
         while self.run:
             sleep(1)
-            logger.info("Receiving data...")
-            result, data = self.receive_data(self._conn)
-            logger.info(f"Result: {result}")
-            if result is False:
-                continue
-            logger.info("Received data from connected user: " + str(data))
-        if self._conn:
-            self._conn.close()  # close the connection
+            for client in self._connections:
+                if client.registered:
+                    logger.info("Receiving data...")
+                    result, data = self.receive_data(client.connection)
+                    logger.info(f"Result: {result}")
+                    if result is False:
+                        continue
+                    logger.info("Received data from connected user: " + str(data))
+        for client in self._connections:
+            if client.connection:
+                client.connection.close()  # close the connection
     
     
     @__lock_mutex
-    def send_data(self, conn, data=None):
+    def send_data(self, conn, message: Message=None):
         logger.info("")
         # Sends to the socket
-        if (data):
-            data_bytes = data.encode('utf-8')
+        if (message is not None):
+            data_bytes = message.serialize()
         else:
-            data_bytes = self.message_to_send.encode('utf-8')
+            # data_bytes = self.message_to_send.encode('utf-8')
+            logger.info("No message to be send")
+            return
 
         try:
             if(conn):
@@ -142,7 +158,10 @@ class UE5Server:
         logger.info("")
         while self.run:
             sleep(1)
-            logger.info("Sending data...")
-            self.send_data(self._conn)
-        if self._conn:
-            self._conn.close()  # close the connection
+            for client in self._connections:
+                if client.registered:
+                    logger.info("Sending data...")
+                    self.send_data(client.connection, client.message_to_send)
+        for client in self._connections:
+            if client.connection:
+                client.connection.close()  # close the connection
