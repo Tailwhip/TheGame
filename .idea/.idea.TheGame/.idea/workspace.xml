@@ -12,15 +12,22 @@
   <component name="ChangeListManager">
     <list default="true" id="cb4ef209-1d33-492c-bb5c-2f1d4af4b94e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.TheGame/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.TheGame/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.vsconfig" beforeDir="false" afterPath="$PROJECT_DIR$/.vsconfig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Core/UIWidgetTG.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Core/UIWidgetTG.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Map/DefaultTG.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Map/DefaultTG.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Python/drone_trainer/uecommunication/messages.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Objects/Drone.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Objects/Drone.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Python/drone_trainer/uecommunication/message.py" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Python/drone_trainer/uecommunication/message.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/Python/drone_trainer/uecommunication/ue_communication_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Python/drone_trainer/uecommunication/ue_communication_server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Private/CharacterTG.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/Private/CharacterTG.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/TheGame/Private/DroneTrainerCommunicationTG.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/Private/DroneTrainerCommunicationTG.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Private/PlayerControllerTG.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/Private/PlayerControllerTG.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/TheGame/Private/PythonCommunicationComponentTG.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/Private/PythonCommunicationComponentTG.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Public/CharacterTG.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/Public/CharacterTG.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/TheGame/Public/DroneTrainerCommunicationTG.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/Public/DroneTrainerCommunicationTG.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Public/PlayerControllerTG.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/Public/PlayerControllerTG.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/TheGame/Public/PythonCommunicationComponentTG.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/Public/PythonCommunicationComponentTG.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/TheGame/TheGame.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/TheGame.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/TheGame/TheGame.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/TheGame.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TheGame.uproject" beforeDir="false" afterPath="$PROJECT_DIR$/TheGame.uproject" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,40 +41,19 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Plugins/AI/MLAdapter/Intermediate/Build/Win64/UnrealGame/Inc/MLAdapter/UHT/MLAdapterLocalDataCollectionSession.generated.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Plugins/AI/MLAdapter/Intermediate/Build/Win64/UnrealGame/Inc/MLAdapter/UHT/MLAdapterSession.generated.h" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Plugins/AI/MLAdapter/Source/MLAdapter/Public/Agents/MLAdapterAgent.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Android/AndroidPlatform.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Containers/Array.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Containers/UnrealString.h.inl" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/CoreGlobals.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Delegates/DelegateCombinations.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/HAL/Platform.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Logging/LogMacros.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Logging/LogVerbosity.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Misc/OutputDevice.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Misc/Variant.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/UObject/NameTypes.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Core/Public/Windows/WindowsPlatform.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/CoreUObject/Public/UObject/Object.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectBase.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectBaseUtility.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Classes/Components/ActorComponent.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Classes/Engine/EngineTypes.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Classes/GameFramework/Actor.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Classes/GameFramework/Controller.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Classes/GameFramework/GameSession.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Engine/Classes/GameFramework/PlayerController.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Networking/Public/Interfaces/IPv4/IPv4Address.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Networking/Public/Interfaces/IPv4/IPv4Endpoint.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Sockets/Private/Sockets.cpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Sockets/Public/IPAddress.h" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.4/Engine/Source/Runtime/Sockets/Public/Sockets.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.5/Engine/Source/Runtime/Core/Public/Containers/Array.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.5/Engine/Source/Runtime/Engine/Classes/Camera/CameraComponent.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.5/Engine/Source/Runtime/Engine/Classes/GameFramework/Character.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.5/Engine/Source/Runtime/Engine/Private/Character.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.5/Engine/Source/Runtime/Networking/Public/Common/TcpSocketBuilder.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.5/Engine/Source/Runtime/Networking/Public/Common/UdpSocketBuilder.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Epic Games/UE_5.5/Engine/Source/Runtime/Sockets/Private/Sockets.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.41.34120/include/variant" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../../../Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.41.34120/include/xutility" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/TheGame/Private/MLAdapterComponentTG.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/TheGame/Private/ProjectileTG.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Source/TheGame/Public/MLAdapterComponentTG.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/TheGame/Public/ProjectileTG.h" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -78,24 +64,24 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Project.AutomationTool.executor": "Run",
-    "C++ Project.TheGame.executor": "Run",
-    "C++ Project.UE5.executor": "Run",
-    "Notification.DisplayName-DoNotAsk-Rider": "Rider",
-    "Notification.DoNotAsk-Rider": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Project.AutomationTool.executor&quot;: &quot;Run&quot;,
+    &quot;C++ Project.TheGame.executor&quot;: &quot;Run&quot;,
+    &quot;C++ Project.UE5.executor&quot;: &quot;Run&quot;,
+    &quot;Notification.DisplayName-DoNotAsk-Rider&quot;: &quot;Rider&quot;,
+    &quot;Notification.DoNotAsk-Rider&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="C++ Project.TheGame">
     <configuration name="TheGame" type="CppProject" factoryName="C++ Project">
       <configuration_1>
@@ -531,7 +517,13 @@
       <workItem from="1734607716336" duration="20440000" />
       <workItem from="1734694514259" duration="3898000" />
       <workItem from="1734765758274" duration="17728000" />
-      <workItem from="1734869106256" duration="13561000" />
+      <workItem from="1734869106256" duration="13917000" />
+      <workItem from="1734947418077" duration="3921000" />
+      <workItem from="1735304909703" duration="18496000" />
+      <workItem from="1735384698548" duration="11143000" />
+      <workItem from="1735557229522" duration="9316000" />
+      <workItem from="1735661346598" duration="5773000" />
+      <workItem from="1735832671938" duration="9921000" />
     </task>
     <servers />
   </component>

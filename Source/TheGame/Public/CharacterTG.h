@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "ProjectileTG.h"
+#include "Camera/CameraComponent.h"
 // #include "MLAdapterLocDataCollectSessionTG.h"
 // #include "Agents/MLAdapterAgent.h"
 
@@ -24,9 +26,19 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	void ShootProjectile() const;
+
+	// UPROPERTY(EditAnywhere, meta=(TitleProperty="Projectile"), Category = "Projectile")
+	// AActor Projectile;
+	//
+	UPROPERTY(EditAnywhere, Category = Projectile)
+	TSubclassOf<class AProjectileTG> ProjectileClass;
 	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
+
+private:
+	TObjectPtr<UCameraComponent> Camera = nullptr;
 };

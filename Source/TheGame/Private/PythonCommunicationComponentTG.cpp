@@ -50,8 +50,7 @@ void UPythonCommunicationComponentTG::BeginPlay()
 void UPythonCommunicationComponentTG::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	TRACE("");
-	EndServer();
-	// EndConnection();
+	EndConnection();
 	Super::EndPlay(EndPlayReason);
 }
 
@@ -85,35 +84,43 @@ void UPythonCommunicationComponentTG::ResumeHandlingData()
 	bShouldHandleData = true;
 }
 
-// Start the server to listen for incoming data, and define a socket for sending a response
-void UPythonCommunicationComponentTG::StartServer() 
+
+void UPythonCommunicationComponentTG::ConnectToServer()
 {
 	TRACE("");
-	// Sets up a TCP server on localhost:PORT.
+	// Sets up a TCP client connection with server on localhost:PORT.
 	FIPv4Endpoint ListenerEndpoint(FIPv4Address(127, 0, 0, 1), ServerPort);
 
 	// Listening for incoming connections
-	ReceivingSocket = FTcpSocketBuilder(TEXT("Python Listener"))
-		.AsReusable() // Can be used after being deleted (after the server is closed), without having to wait some time
-		.BoundToEndpoint(ListenerEndpoint) // Binds it to the Endpoint
-		.Listening(8); // Max number of pending connections
-
-	// Define a socket that will send a response back to Python when necessary 
-	SendingSocket = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)
-		->CreateSocket(NAME_Stream, TEXT("Send response to Python"), false);
-
-	if (ReceivingSocket) // If ReceivingSocket was created successfully
+	ClientSocket = FUdpSocketBuilder(TEXT("Python Client"))
+		.AsReusable(); // Can be used after being deleted (after the server is closed), without having to wait some time
+	// .BoundToEndpoint(ListenerEndpoint) // Binds it to the Endpoint
+	// .Listening(8); // Max number of pending connections
+	
+	if (!ClientSocket->Connect(*ListenerEndpoint.ToInternetAddrIPV4()))
+	{
+		TRACEERROR("The connection to server has failed!");
+		return;
+	}
+	
+	// // Define a socket that will send a response back to Python when necessary 
+	// ClientSocket = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)
+	// 	->CreateSocket(NAME_Stream, TEXT("Send response to Python"), false);
+	//
+	
+	if (ClientSocket) // If ClientSocket was created successfully
 	{
 		// Initializes a timer to periodically handle incoming data from connected clients (Python script).
 		FTimerDelegate TimerDelegate;
 		TimerDelegate.BindLambda([this]() 
-			{ 
-				HandleData(); 
+			{
+				if (isRegistered)
+					HandleData();
+				else
+					HandleConnection();
 			});
 		
 		GetOwner()->GetWorldTimerManager().SetTimer(TickTimerHandle, TimerDelegate, 1.0f, true);
-
-		TRACE("Listener server started");
 	}
 
 	// Note: The server listens for incoming connections and uses a separate socket for sending responses to Python.
@@ -123,32 +130,31 @@ void UPythonCommunicationComponentTG::StartServer()
 void UPythonCommunicationComponentTG::SendMessage(DroneTrainerCommTG::Message& Message) 
 {
 	TRACE("");
-	if (SendingSocket) // If SendingSocket was created successfully
+	if (!ClientSocket) // If ClientSocket was created successfully
 	{
-		// Connects to the Python server using the SendingSocket.
-		FIPv4Endpoint SendEndpoint(FIPv4Address(127, 0, 0, 1), ServerPort);
-		SendingSocket->Connect(*SendEndpoint.ToInternetAddr());
-		
-		// Sending the response data.
-		TTuple<DroneTrainerCommTG::PayloadLen,
-				const DroneTrainerCommTG::Byte*> MessageBuffer = Message.Serialize();
-		const uint8* Data = MessageBuffer.Value;
-		int32 PayloadLen = MessageBuffer.Key;
-		int32 BytesSent = 0;
-		TRACE("Data to be sent:")
-		FString DataHex;
-		for (int32 i=0;i<PayloadLen;i++)
-			DataHex.Append(FString::Printf(TEXT("0x%02x "), Data[i]));
-
-		TRACE("Data to be sent: (hex): %s", *DataHex)
-
-		SendingSocket->Send(Data, PayloadLen, BytesSent);
-
-		if (BytesSent == PayloadLen)
-		{
-			TRACE("Data has been sent successfully");
-		}
+		TRACEERROR("ClientSocket is invalid!");
+		return;
 	}
+	// Connects to the Python server using the ClientSocket.
+	// FIPv4Endpoint SendEndpoint(FIPv4Address(127, 0, 0, 1), ServerPort);
+	// if (ClientSocket->Connect(*SendEndpoint.ToInternetAddr()))
+	// {
+	// Sending the response data.
+	TTuple<DroneTrainerCommTG::PayloadLen,
+			const DroneTrainerCommTG::Byte*> MessageBuffer = Message.Serialize();
+	const uint8* Data = MessageBuffer.Value;
+	int32 PayloadLen = MessageBuffer.Key;
+	int32 BytesSent = 0;
+	TRACE("Data to be sent: ")
+	FString DataHex;
+	for (int32 i = 0; i < PayloadLen; i++)
+		DataHex.Append(FString::Printf(TEXT("0x%02x "), Data[i]));
+	TRACE("Data to be sent: (hex): %s", *DataHex)
+	ClientSocket->Send(Data, PayloadLen, BytesSent);
+	if (BytesSent == PayloadLen) TRACE("Data has been sent successfully");
+	// }
+	// else
+	// 	TRACEERROR("Could not connect to server with port: %d", ServerPort);
 }
 
 // Handles the incoming data from connected clients (Python script)
@@ -162,24 +168,27 @@ void UPythonCommunicationComponentTG::HandleData()
 		return;
 	}
 
-	if (!ReceivingSocket) // If socket is not valid for any reason stop 
+	if (!ClientSocket) // If socket is not valid for any reason stop 
 	{
 		TRACEERROR("Listener server stopped!");
 		return;
 	}
 
-	if (ReceivingSocket && ReceivingSocket->GetConnectionState() == SCS_Connected)
+	if (ClientSocket && ClientSocket->GetConnectionState() == SCS_Connected)
 	{
 		// Receives data from the active socket.
 		char Buffer[1024] = { 0 };
 		int32 BytesRead = 0;
-		ReceivingSocket->Recv((uint8*)Buffer, sizeof(Buffer), BytesRead);
-		
+		if (!ClientSocket->Recv((uint8*)Buffer, sizeof(Buffer), BytesRead))
+		{
+			TRACEERROR("No data has been received!")
+			return;
+		}
 		// Converts the data to FString and triggers an event (inside of Unreal Engine)
 		ReceivedData = FString(FUTF8ToTCHAR(Buffer));
 		FString ReceivedDataHex;
 		
-		for (int32 i=0;i<ReceivedData.Len();i++)
+		for (int32 i = 0; i < ReceivedData.Len(); i++)
 			ReceivedDataHex.Append(FString::Printf(TEXT("0x%02x "), Buffer[i]));
 		TRACE("Data received (hex): %s", *ReceivedDataHex)
 		TRACE("Data received: %s", *ReceivedData)
@@ -197,7 +206,7 @@ void UPythonCommunicationComponentTG::HandleConnection()
 		return;
 	}
 
-	if (!ReceivingSocket) // If socket is not valid for any reason stop 
+	if (!ClientSocket) // If socket is not valid for any reason stop 
 	{
 		TRACEERROR("Listener server stopped!");
 		return;
@@ -211,97 +220,67 @@ void UPythonCommunicationComponentTG::HandleConnection()
 
 	CurrentSignalsBuffer.Empty();
 	
-	if (ReceivingSocket && ReceivingSocket->GetConnectionState() == SCS_Connected)
+	if (ClientSocket && ClientSocket->GetConnectionState() == SCS_Connected)
 	{
 		// Receives data from the active socket.
 		char Buffer[MAX_DATA_SIZE] = { 0 };
 		int32 BytesRead = 0;
-		ReceivingSocket->Recv((uint8*)Buffer, sizeof(Buffer), BytesRead);
+		if (!ClientSocket->Recv((uint8*)Buffer, sizeof(Buffer), BytesRead))
+		{
+			TRACEERROR("No data has been received!")
+			return;
+		}
+		else
+		{
+			TRACE("Received %d bytes of data", BytesRead)
+		}
 		
 		// Converts the data to FString and triggers an event (inside of Unreal Engine)
-		ReceivedData = FString(FUTF8ToTCHAR(Buffer));
 		FString ReceivedDataHex;
-		
-		for (int32 i=0;i<ReceivedData.Len();i++)
+		for (int32 i=0; i < BytesRead; i++)
 			ReceivedDataHex.Append(FString::Printf(TEXT("0x%02x "), Buffer[i]));
 
 		TRACE("Data received (hex): %s", *ReceivedDataHex)
-		TRACE("Data received: %s", *ReceivedData)
 		TArray<DroneTrainerCommTG::Signal> data;
 		DroneTrainerCommTG::Message msg =
 			DroneTrainerCommTG::Message(0, DroneTrainerCommTG::MsgType::None, data);
 		msg.Deserialize((uint8*)Buffer);
-		if (1 == std::get<uint8>(msg.Data[0].Value))
-			isRegistered = true;
+		if (!msg.Data.IsEmpty())
+		{
+			uint8 value = std::get<uint8>(msg.Data[0].Value);
+			TRACE("received Message: Reg Id %d; Msg Type: %d; Value: %d",
+				msg.RegisterId, static_cast<int>(msg.MessageType), value);
+			if (DroneTrainerCommTG::MsgType::Register == msg.MessageType && 1 == value)
+			{
+				isRegistered = true;
+				TRACE("Client registered successfully!")
+			}
+		}
+		else
+		{
+			TRACE("Received Message Data is empty!")
+		}
 	}
 }
 
 // Closes the server socket and cleans up associated resources.
 // Also closes the socket used for sending responses to Python.
-void UPythonCommunicationComponentTG::EndServer()
-{
-	TRACE("");
-	if (ReceivingSocket)
-	{
-		ReceivingSocket->Close();
-		ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->DestroySocket(ReceivingSocket);
-		ReceivingSocket = nullptr;
-		UE_LOG(LogTemp, Log, TEXT("Listener server ended."));
-	}
-
-	if (SendingSocket)
-	{
-		SendingSocket->Close();
-		ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->DestroySocket(SendingSocket);
-		SendingSocket = nullptr;
-		UE_LOG(LogTemp, Log, TEXT("Send server ended"));
-	}
-}
-
-void UPythonCommunicationComponentTG::ConnectToServer()
-{
-	TRACE("");
-	// Sets up a TCP client connection with server on localhost:PORT.
-	FIPv4Endpoint ListenerEndpoint(FIPv4Address(127, 0, 0, 1), ServerPort);
-
-	// Listening for incoming connections
-	ReceivingSocket = FTcpSocketBuilder(TEXT("Python Listener"))
-		.AsReusable(); // Can be used after being deleted (after the server is closed), without having to wait some time
-		// .BoundToEndpoint(ListenerEndpoint) // Binds it to the Endpoint
-		// .Listening(8); // Max number of pending connections
-
-	if (!ReceivingSocket->Connect(*ListenerEndpoint.ToInternetAddrIPV4()))
-	{
-		TRACEERROR("The connection to server has failed!");
-	}
-	
-	// Define a socket that will send a response back to Python when necessary 
-	SendingSocket = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)
-		->CreateSocket(NAME_Stream, TEXT("Send response to Python"), false);
-	
-	
-	if (ReceivingSocket) // If ReceivingSocket was created successfully
-	{
-		// Initializes a timer to periodically handle incoming data from connected clients (Python script).
-		FTimerDelegate TimerDelegate;
-		TimerDelegate.BindLambda([this]() 
-			{
-				if (isRegistered)
-					HandleData();
-				else
-					HandleConnection();
-			});
-		
-		GetOwner()->GetWorldTimerManager().SetTimer(TickTimerHandle, TimerDelegate, 1.0f, true);
-
-		TRACE("Listener server started");
-	}
-
-	// Note: The server listens for incoming connections and uses a separate socket for sending responses to Python.
-}
-
 void UPythonCommunicationComponentTG::EndConnection()
 {
 	TRACE("");
+	if (ClientSocket)
+	{
+		ClientSocket->Close();
+		ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->DestroySocket(ClientSocket);
+		ClientSocket = nullptr;
+		UE_LOG(LogTemp, Log, TEXT("Sending socket ended."));
+	}
 
+	// if (ReceivingSocket)
+	// {
+	// 	ReceivingSocket->Close();
+	// 	ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->DestroySocket(ReceivingSocket);
+	// 	ReceivingSocket = nullptr;
+	// 	UE_LOG(LogTemp, Log, TEXT("Receiving socket ended"));
+	// }
 }

@@ -26,11 +26,10 @@ using SignalVariantType = std::variant<uint8, uint16, uint32, uint64, float, dou
 enum class MsgType: uint8
 {
 	None = 0,
-	Register,		// [Id][MsgType][DataLen=0][Data=0]
-	Snapshot,		// [Id][MsgType][DataLen][Data]
-	Unregister,		// [Id][MsgType][DataLen][Data]
-	ServerResponse, // [Id=0][MsgType][OK/NOK]
-	Command			// [Id][MsgType][DataLen][Data]
+	Register,		// [Id] [MsgType] [DataLen=1] [SignalDataType=1][SignalData=1/0]...
+	Snapshot,		// [Id] [MsgType] [DataLen]   [SignalDataType1][SignalData1]...
+	Unregister,		// [Id] [MsgType] [DataLen]   [SignalDataType1][SignalData1]...
+	Command			// [Id] [MsgType] [DataLen]   [SignalDataType1][SignalData1]...
 };
 
 enum class SignalValueType: uint8
@@ -64,6 +63,7 @@ struct Signal
 	Signal(Signal&& signal);
 	Signal& operator=(const Signal& signal);
 	Signal& operator=(Signal&& signal);
+	
 	SignalValueType Type{SignalValueType::None};
 	SignalVariantType Value{};
 	

@@ -2,8 +2,9 @@
 
 
 #include "CharacterTG.h"
-
+#include "TheGame/TheGame.h"
 #include "GameFramework/PawnMovementComponent.h"
+// #include "UniversalObjectLocators/UniversalObjectLocatorUtils.h"
 
 // Sets default values
 ACharacterTG::ACharacterTG()
@@ -16,6 +17,16 @@ ACharacterTG::ACharacterTG()
 void ACharacterTG::BeginPlay()
 {
 	Super::BeginPlay();
+	Camera = NewObject<UCameraComponent>(this, "CameraTG");
+	// auto CharacterLocation = GetOwner()->GetActorTransform().GetLocation();
+	if (Camera)
+	{
+		Camera->RegisterComponent();
+		Camera->AttachToComponent(RootComponent.Get(), FAttachmentTransformRules::KeepRelativeTransform);
+		Camera->CreationMethod = EComponentCreationMethod::Instance;
+		Camera->bUsePawnControlRotation = true;
+		Camera->SetRelativeLocation(FVector(-382.0, 0.0,102.0));
+	}
 	if (GetMovementComponent())
 	{
 		GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
@@ -27,7 +38,7 @@ void ACharacterTG::BeginPlay()
 void ACharacterTG::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 }
 
 // Called to bind functionality to input
@@ -35,5 +46,11 @@ void ACharacterTG::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void ACharacterTG::ShootProjectile() const
+{
+	TRACE("")
+	GetWorld()->SpawnActor<AProjectileTG>(ProjectileClass, Camera->GetComponentTransform());
 }
 

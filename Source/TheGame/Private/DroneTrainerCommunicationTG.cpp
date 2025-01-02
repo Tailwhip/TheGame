@@ -61,6 +61,7 @@ TTuple<PayloadLen, const Byte*> Signal::Serialize()
 
 uint32 Signal::Deserialize(const Byte* data)
 {
+	TRACEWARN("");
 	uint32 currBufPos = 0;
 	Byte typeBuf[sizeof(SignalValueType)] = {0};
 	memcpy( typeBuf, data + currBufPos, sizeof(SignalValueType) );
@@ -69,6 +70,12 @@ uint32 Signal::Deserialize(const Byte* data)
 	const int32 typeLen = SignalValueTypeSizes[Type];
 	Byte* valueBuf = (Byte*)calloc(1,typeLen);
 	memcpy( valueBuf, data + currBufPos, typeLen );
+
+	FString ReceivedDataHex;
+	for (int32 i=0; i < sizeof(data); i++)
+		ReceivedDataHex.Append(FString::Printf(TEXT("0x%02x "), data[i]));
+	TRACEWARN("Data received (hex): %s", *ReceivedDataHex)
+	
 	switch (Type)
 	{
 		case SignalValueType::UINT8:
@@ -90,9 +97,11 @@ uint32 Signal::Deserialize(const Byte* data)
 			Value = FromBytes<double>(valueBuf);
 			break;
 		case SignalValueType::PAYLOAD:
+		{
 			Value = Payload{valueBuf, typeLen};
 			TRACEWARN("Signal value %s", valueBuf);
 			break;
+		}
 		default:
 			TRACEWARN("Unrecognized type: %d", static_cast<uint8>(Type));
 	}
@@ -113,7 +122,7 @@ Message::Message(RegId regId, MsgType msgType, TArray<Signal>& data):
 
 TTuple<PayloadLen, const Byte*> Message::Serialize()
 {
-	TRACEWARN("");
+	TRACEWARN("Reg Id: %d, Msg Type: %d", RegisterId, MessageType);
 	Bytes.Empty();
 	Bytes.Append(ToBytes(RegisterId), sizeof(RegId));
 	Bytes.Append(ToBytes(MessageType), sizeof(MsgType));
@@ -130,6 +139,7 @@ TTuple<PayloadLen, const Byte*> Message::Serialize()
 
 uint32 Message::Deserialize(const Byte* data)
 {
+	TRACEWARN("");
 	uint32 currBufPos = 0;
 	Byte regIdBuf[sizeof(RegId)] = {0};
 	memcpy( regIdBuf , data + currBufPos , sizeof(RegId) );
@@ -143,7 +153,7 @@ uint32 Message::Deserialize(const Byte* data)
 	memcpy( signalsNumBuf , data + sizeof(RegId) + currBufPos, sizeof(PayloadLen) );
 	PayloadLen sigNum = FromBytes<PayloadLen>(signalsNumBuf);
 	currBufPos += sizeof(PayloadLen);
-	for (PayloadLen i=0; i<sigNum; i++)
+	for (PayloadLen i = 0; i < sigNum; i++)
 	{
 		const uint32 bufLen = (MAX_DATA_SIZE - currBufPos);
 		Byte* sigBuf = (Byte*)calloc(bufLen,sizeof(Byte));
@@ -153,7 +163,7 @@ uint32 Message::Deserialize(const Byte* data)
 		Data.Add(std::move(sig));
 		free(sigBuf);
 	}
-		
+	
 	return currBufPos;
 }
 

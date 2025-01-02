@@ -9,6 +9,7 @@
 
 
 // Forward Declarations
+
 class UEnhancedInputComponent;
 class ACharacterTG;
 class UInputAction;
@@ -54,6 +55,7 @@ public:
 protected:
 	virtual void OnPossess(APawn* aPawn) override;
 	virtual void OnUnPossess() override;
+	virtual void ProcessPlayerInput(const float DeltaTime, const bool bGamePaused) override;
 	
 	void HandleMove(const FInputActionValue& InputActionValue);
 	void HandleLook(const FInputActionValue& InputActionValue);

@@ -39,17 +39,14 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 private:
-	void StartServer();
-	void EndServer();
 	void HandleData();
 	void HandleConnection();
 	void SendMessage(DroneTrainerCommTG::Message& Message);
-
 	void ConnectToServer();
 	void EndConnection();
 
-	FSocket* ReceivingSocket;
-	FSocket* SendingSocket;
+	FSocket* ClientSocket;
+	// FSocket* ReceivingSocket;
 	FTimerHandle TickTimerHandle;
 	TArray<DroneTrainerCommTG::Signal> CurrentSignalsBuffer;
 	

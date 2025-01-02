@@ -7,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include <map>
+#include <string>
 #include <stdexcept>
 // #include "Logging/StructuredLog.h" // LOGMTF(...)
 #include "CoreMinimal.h"

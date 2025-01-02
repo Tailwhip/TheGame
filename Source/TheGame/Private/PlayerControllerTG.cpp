@@ -5,6 +5,7 @@
 #include "CharacterTG.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "TheGame/TheGame.h"
 #include "Engine/GameEngine.h"
 #include "GameFramework/PawnMovementComponent.h"
 
@@ -12,7 +13,7 @@
 void APlayerControllerTGBase::OnPossess(APawn* aPawn)
 {
     Super::OnPossess(aPawn);
-
+    
     // Store a reference to the Player's Pawn
     PlayerCharacter = Cast<ACharacterTG>(aPawn);
     checkf(PlayerCharacter, 
@@ -79,6 +80,39 @@ void APlayerControllerTGBase::OnUnPossess()
 
     // Call the parent class method
     Super::OnUnPossess();
+}
+
+void APlayerControllerTGBase::ProcessPlayerInput(const float DeltaTime, const bool bGamePaused)
+{
+    Super::ProcessPlayerInput(DeltaTime, bGamePaused);
+
+    if (bGamePaused) return;
+
+    if (IsInputKeyDown(EKeys::RightMouseButton) || IsInputKeyDown(EKeys::LeftMouseButton))
+    {
+        int a = 0;
+    }
+    if (WasInputKeyJustPressed(EKeys::LeftMouseButton))
+    {
+        TRACE("Shooting projectile...")
+        PlayerCharacter->ShootProjectile();
+    }
+    if (WasInputKeyJustPressed(EKeys::RightMouseButton))
+    {
+        int a = 0;
+    }
+    if (WasInputKeyJustPressed(EKeys::MiddleMouseButton))
+    {
+        int a = 0;
+    }
+    if (WasInputKeyJustPressed(EKeys::ThumbMouseButton))
+    {
+        int a = 0;
+    }
+    if (WasInputKeyJustPressed(EKeys::ThumbMouseButton2))
+    {
+        int a = 0;
+    }
 }
 
 void APlayerControllerTGBase::HandleMove(const FInputActionValue& InputActionValue)
