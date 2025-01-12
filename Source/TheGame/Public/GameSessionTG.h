@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameSession.h"
-#include "MLAdapterLocDataCollectSessionTG.h"
 #include "GameSessionTG.generated.h"
 
 /**
@@ -18,10 +17,4 @@ class THEGAME_API AGameSessionTG : public AGameSession
 public:
 	virtual void BeginPlay() override;
 	
-	UFUNCTION()
-	void AddAgent();
-	
-// private:
-// 	UPROPERTY()
-// 	TWeakObjectPtr<UMLAdapterLocDataCollectSessionTG> MLAdapterDataCollectSession;
 };

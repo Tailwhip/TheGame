@@ -21,6 +21,10 @@ public:
 	// Sets default values for this character's properties
 	ACharacterTG();
 
+	virtual void BeginPlay() override;
+
+	virtual  void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -36,9 +40,12 @@ public:
 	TSubclassOf<class AProjectileTG> ProjectileClass;
 	
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UPROPERTY()
+	TObjectPtr<UCameraComponent> Camera{nullptr};
 
-private:
-	TObjectPtr<UCameraComponent> Camera = nullptr;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UDroneHudTG> DroneHudClass{nullptr};
+
+	UPROPERTY()
+	class UDroneHudTG* DroneHud{nullptr};
 };

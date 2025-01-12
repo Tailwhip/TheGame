@@ -3,16 +3,10 @@
 
 #include "GameSessionTG.h"
 
-#include "MLAdapter/Public/Agents/MLAdapterAgent.h"
 
 void AGameSessionTG::BeginPlay()
 {
 	Super::BeginPlay();
 	
 
-}
-
-void AGameSessionTG::AddAgent()
-{
-	// MLAdapterDataCollectSession->AddAgent();
 }

@@ -11,7 +11,8 @@
 			"AdditionalDependencies": [
 				"Engine",
 				"LearningAgents",
-				"MLAdapter"
+				"MLAdapter",
+				"UMG"
 			]
 		}
 	],

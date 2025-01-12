@@ -12,7 +12,7 @@ public class TheGame : ModuleRules
 		{ 
 			"Core", "CoreUObject", "Engine", "InputCore", 
 			"EnhancedInput", "LearningAgents", "LearningAgentsTraining",
-			"Sockets", "Networking", "MLAdapter"
+			"Sockets", "Networking", "MLAdapter", "UMG"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
