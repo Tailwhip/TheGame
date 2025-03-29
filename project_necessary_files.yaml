@@ -1,0 +1,6 @@
+directories:
+	Config
+	Content
+	Source
+files:
+	.uproject

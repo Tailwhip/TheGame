@@ -11,26 +11,28 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b2910e28-f01a-4317-a606-f1982ff6b241" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.TheGame/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.TheGame/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="5d9df6a2-aaec-4234-8774-372e9e61c07b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.TheGame/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.TheGame/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/2024-11-26-Project_necessary_files.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Core/GameModeTG.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Core/GameModeTG.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Learning/LearningAgentsManagerComponentTG.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Learning/LearningAgentsManagerTG.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Learning/MLAdapterSensor_InputTG.uasset" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Input/DefaultMappingContext.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Input/DefaultMappingContext.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Input/PlayerControllerTG.uasset" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Map/DefaultTG.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Map/DefaultTG.umap" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Objects/Drone.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Objects/Drone.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Objects/Projectile.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Objects/Projectile.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/TheGame/Private/CharacterTG.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/Private/CharacterTG.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/TheGame/Private/GameSessionTG.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/Private/GameSessionTG.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/TheGame/Private/MLAdapterComponentTG.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/TheGame/Private/MLAdapterLocDataCollectSessionTG.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/TheGame/Public/CharacterTG.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/Public/CharacterTG.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/TheGame/Public/GameSessionTG.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/Public/GameSessionTG.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/TheGame/Public/MLAdapterComponentTG.h" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/TheGame/Public/MLAdapterLocDataCollectSessionTG.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Private/CharacterTG.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Private/DroneTrainerCommunicationTG.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Private/HudTG.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Private/PlayerControllerTG.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Private/ProjectileTG.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/Private/ProjectileTG.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Private/PythonCommunicationComponentTG.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Public/CharacterTG.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Public/DroneTrainerCommunicationTG.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Public/HudTG.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Public/PlayerControllerTG.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Public/ProjectileTG.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/Public/ProjectileTG.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/TheGame/Public/PythonCommunicationComponentTG.h" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Source/TheGame/TheGame.Build.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Source/TheGame/TheGame.Build.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TheGame.uproject" beforeDir="false" afterPath="$PROJECT_DIR$/TheGame.uproject" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,14 +42,19 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProblemsViewState">
-    <option name="selectedTabId" value="CurrentFile" />
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Source/TheGame/Private/Base/CharacterTG.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/TheGame/Private/Base/PlayerControllerTG.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/TheGame/Private/DroneTG.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/TheGame/Public/Base/CharacterTG.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/TheGame/Public/Base/PlayerControllerTG.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Source/TheGame/Public/DroneTG.h" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo"><![CDATA[{
   "customColor": "",
   "associatedIndex": 0
 }]]></component>
-  <component name="ProjectId" id="2rXroVwrsDStDjMJSZ8oLp7529U" />
+  <component name="ProjectId" id="2sotdeXiKnqtaqhG3ow5n8A66wt" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -56,7 +63,6 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "main",
-    "ignore.virus.scanning.warn.message": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -68,7 +74,7 @@
   <component name="RunManager" selected="C++ Project.TheGame">
     <configuration name="TheGame" type="CppProject" factoryName="C++ Project">
       <configuration_1>
-        <option name="CONFIGURATION" value="Development" />
+        <option name="CONFIGURATION" value="Development Editor" />
         <option name="PLATFORM" value="Win64" />
         <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/Intermediate/ProjectFiles/TheGame.vcxproj" />
         <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
@@ -236,7 +242,7 @@
         <option name="TERMINAL_INTERACTION_BEHAVIOR" value="AUTO_DETECT" />
       </configuration_14>
       <configuration_15>
-        <option name="CONFIGURATION" value="Development Editor" />
+        <option name="CONFIGURATION" value="Development" />
         <option name="PLATFORM" value="Win64" />
         <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/Intermediate/ProjectFiles/TheGame.vcxproj" />
         <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
@@ -255,7 +261,7 @@
     </configuration>
     <configuration name="UE5" type="CppProject" factoryName="C++ Project">
       <configuration_1>
-        <option name="CONFIGURATION" value="Development" />
+        <option name="CONFIGURATION" value="Development Editor" />
         <option name="PLATFORM" value="Win64" />
         <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/Intermediate/ProjectFiles/UE5.vcxproj" />
         <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
@@ -423,7 +429,7 @@
         <option name="TERMINAL_INTERACTION_BEHAVIOR" value="AUTO_DETECT" />
       </configuration_14>
       <configuration_15>
-        <option name="CONFIGURATION" value="Development Editor" />
+        <option name="CONFIGURATION" value="Development" />
         <option name="PLATFORM" value="Win64" />
         <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/Intermediate/ProjectFiles/UE5.vcxproj" />
         <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
@@ -495,12 +501,12 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="b2910e28-f01a-4317-a606-f1982ff6b241" name="Changes" comment="" />
-      <created>1736716439811</created>
+      <changelist id="5d9df6a2-aaec-4234-8774-372e9e61c07b" name="Changes" comment="" />
+      <created>1739133850742</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1736716439811</updated>
-      <workItem from="1736716442809" duration="382000" />
+      <updated>1739133850742</updated>
+      <workItem from="1739133854276" duration="2326000" />
     </task>
     <servers />
   </component>

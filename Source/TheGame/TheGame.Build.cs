@@ -12,7 +12,7 @@ public class TheGame : ModuleRules
 		{ 
 			"Core", "CoreUObject", "Engine", "InputCore", 
 			"EnhancedInput", "LearningAgents", "LearningAgentsTraining",
-			"Sockets", "Networking", "MLAdapter", "UMG"
+			"Sockets", "Networking", "MLAdapter", "UMG", "Niagara", "Kismet"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
@@ -22,7 +22,9 @@ public class TheGame : ModuleRules
 		
 		PublicIncludePaths.AddRange(new string[]
 		{
-			"C:/Users/Taail/AppData/Local/Programs/Python/Python312/include"
+			"C:/Users/Taail/AppData/Local/Programs/Python/Python312/include",
+			"C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Base",
+			"C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/PythonCommunication"
 		});
 		
 		PublicAdditionalLibraries.AddRange(new string[]
