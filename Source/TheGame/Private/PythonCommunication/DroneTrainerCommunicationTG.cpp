@@ -99,7 +99,7 @@ uint32 Signal::Deserialize(const Byte* data)
 		case SignalValueType::PAYLOAD:
 		{
 			Value = Payload{valueBuf, typeLen};
-			TRACEWARN("Signal value %s", valueBuf);
+			TRACEWARN("Signal value %s", (TCHAR*)valueBuf);
 			break;
 		}
 		default:

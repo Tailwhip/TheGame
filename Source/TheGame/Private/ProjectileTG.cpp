@@ -49,7 +49,7 @@ void AProjectileTG::OnHit(AActor* OtherActor)
 
 	if (PlayerController)
 	{
-		TRACE("Applying damage: %d", BaseDamage)
+		TRACE("Applying damage: %f", BaseDamage)
 		UGameplayStatics::ApplyDamage(OtherActor, BaseDamage, PlayerController, this, DamageType);
 	}
 	else

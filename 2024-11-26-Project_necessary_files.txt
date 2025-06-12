@@ -1,6 +1,0 @@
-You can try the following (make a backup of your project folder before or have it in source control). This helped me with UE 4.19.2:
-
-Delete all derived folders & files inside the Unreal project folder (leave only Config, Content & Source folders, and .uproject file).
-Re-open Unreal - from the launcher or .uproject.
-Generate your IDE project files (Win: via Explorer context menu; Mac: Via Unreal)
-Best,
