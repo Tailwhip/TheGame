@@ -8,19 +8,32 @@
 #include "NiagaraFunctionLibrary.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 
 // Sets default values
 AProjectileTG::AProjectileTG()
 {
 	TRACE("")
+
 	ProjectileFX = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ProjectileEffect"));
 	SetRootComponent(ProjectileFX);
 	CollisionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ProjectileCollisionObject"));
 	CollisionSphere->SetupAttachment(ProjectileFX);
 	CollisionSphere->SetRelativeScale3D(FVector(0.2125f, 0.2125f, 0.2125f));
-	
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	TRACE("CollisionSphere created")
+	// Projectile movement component
+	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
+	ProjectileMovement->UpdatedComponent = CollisionSphere;
+	ProjectileMovement->InitialSpeed = 5000.f;
+	ProjectileMovement->MaxSpeed = 6000.f;
+	ProjectileMovement->bRotationFollowsVelocity = true;
+	ProjectileMovement->bShouldBounce = false;
+	TRACE("ProjectileMovement created")
+	// Set lifespan
+	InitialLifeSpan = 5.0f;
+
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 }
 

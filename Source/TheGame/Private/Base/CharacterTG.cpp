@@ -9,6 +9,8 @@
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // #include "UniversalObjectLocators/UniversalObjectLocatorUtils.h"
 
@@ -44,10 +46,12 @@ ACharacterTG::ACharacterTG() : Super()
 
 	if (IsLocallyControlled())
 	{
-		PlayerController = CreateDefaultSubobject<APlayerControllerTG>(TEXT("Camera"));
-			// GetController<APlayerControllerTGBase>();
+		TRACE("Is locally controlled")
+		PlayerController = CreateDefaultSubobject<APlayerControllerTG>(TEXT("LocalPlayerController"));
 	}
-	
+	else
+		TRACE("Is globally controlled")
+
 	DroneHud = CreateWidget<UDroneHudTG>(PlayerController, DroneHudClass);
 	// check(DroneHud);
 	if (DroneHud) 
@@ -65,7 +69,6 @@ void ACharacterTG::BeginPlay()
 		GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 		GetMovementComponent()->GetNavAgentPropertiesRef().bCanFly = true;
 	}
-	
 }
 
 void ACharacterTG::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -89,7 +92,6 @@ void ACharacterTG::Tick(float DeltaTime)
 void ACharacterTG::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 void ACharacterTG::ShootProjectile() const
@@ -105,23 +107,56 @@ void ACharacterTG::ShootProjectile() const
 		{
 			TRACEERROR("ThisCharacter not exists!")
 		}
-		// TODO: Setup SpawnParams like SpawnCollisionHandlingOverride or OverrideLevel
-		// FVector SpawnLocation = Camera->GetComponentLocation();
-		// SpawnLocation.X += 200.f;
-		// SpawnLocation.Z -= 50.f;
-		FRotator SpawnRotation = ProjectileSpawnPoint->GetComponentRotation();
-		SpawnRotation.Yaw += 20.f;
+
+		APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
+		if (!PC) return;
+
 		GetWorld()->SpawnActor<AProjectileTG>(
 			ProjectileClass,
 			ProjectileSpawnPoint->GetComponentLocation(),
 			ProjectileSpawnPoint->GetComponentRotation(),
 			SpawnParams);
-		// GetWorld()->SpawnActor<AProjectileTG>(ProjectileClass, Camera->GetComponentTransform());
+		TRACE("Projectile spawned")
+		// TODO: Setup SpawnParams like SpawnCollisionHandlingOverride or OverrideLevel
+		// FVector SpawnLocation = Camera->GetComponentLocation();
+		// SpawnLocation.X += 200.f;
+		// SpawnLocation.Z -= 50.f;
+		//FRotator SpawnRotation = ProjectileSpawnPoint->GetComponentRotation();
+		//SpawnRotation.Yaw += 50.f;
+
+		FVector WorldLocation, WorldDirection;
+
+		// Get screen size
+		int32 ViewportSizeX, ViewportSizeY;
+		PC->GetViewportSize(ViewportSizeX, ViewportSizeY);
+
+		// Convert screen center to world direction
+		FVector2D ScreenCenter(ViewportSizeX / 2.0f, ViewportSizeY / 2.0f);
+		TRACE("Here1")
+		if (PC->DeprojectScreenPositionToWorld(ScreenCenter.X, ScreenCenter.Y, WorldLocation, WorldDirection))
+		{
+			TRACE("Here2")
+			// Get the starting location (projectile's current position)
+			FVector StartLocation = GetActorLocation();
+			TRACE("Here3")
+			// Trace a line in the direction to get a hit location (optional)
+			FVector EndLocation = WorldLocation + (WorldDirection * 10000.0f); // long distance
+
+			FVector ShootDirection = (EndLocation - StartLocation).GetSafeNormal();
+			TRACE("Here4")
+			// Apply velocity
+			if (UProjectileMovementComponent* ProjectileMovement = FindComponentByClass<UProjectileMovementComponent>())
+			{
+				TRACE("Here5")
+				ProjectileMovement->Velocity = ShootDirection * ProjectileMovement->InitialSpeed;
+			}
+		}
+		TRACE("Here6")
 		TRACE("Created projectile")
 	}
 	else
 	{
-		TRACEERROR("Projectile class is missing in blueprint!")
+		TRACEERROR("Projectile class is missing in the blueprint!")
 	}
 }
 

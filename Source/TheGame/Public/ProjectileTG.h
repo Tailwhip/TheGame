@@ -17,13 +17,16 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
+	class UProjectileMovementComponent* ProjectileMovement;
+
 	UPROPERTY(EditDefaultsOnly)
 	class UNiagaraComponent* ProjectileFX;
 	
 	UPROPERTY(EditDefaultsOnly)
 	class UNiagaraSystem* ImpactParticles;
 	
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	class USphereComponent* CollisionSphere;
 
 	UPROPERTY(EditDefaultsOnly)
