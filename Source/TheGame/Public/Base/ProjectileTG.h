@@ -3,7 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Base/ActorTG.h"
+#include "ActorTG.h"
+#include "Components/MeshComponent.h"
+#include "Components/ShapeComponent.h"
+#include "Components/ArrowComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "ProjectileTG.generated.h"
 
 UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
@@ -18,13 +22,25 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditDefaultsOnly)
+	class UMeshComponent* ProjectileMesh;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UMeshComponent> ProjectileMeshType;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UShapeComponent* CollisionShape;
+
+	UPROPERTY(EditDefaultsOnly)
+	class UArrowComponent* ProjectileDirectionArrow;
+
+	UPROPERTY(EditDefaultsOnly)
 	class UNiagaraComponent* ProjectileFX;
 	
 	UPROPERTY(EditDefaultsOnly)
 	class UNiagaraSystem* ImpactParticles;
 	
 	UPROPERTY(EditDefaultsOnly)
-	class USphereComponent* CollisionSphere;
+	class UProjectileMovementComponent* ProjectileMovement;
 
 	UPROPERTY(EditDefaultsOnly)
 	float BaseDamage{10.f};

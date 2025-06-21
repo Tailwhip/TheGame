@@ -17,7 +17,7 @@ public class TheGame : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"LearningAgentsTraining", "ChaosVehicles", "Sockets", "Networking"
+			"LearningAgentsTraining", "Sockets", "Networking"
 		});
 		
 		PublicIncludePaths.AddRange(new string[]

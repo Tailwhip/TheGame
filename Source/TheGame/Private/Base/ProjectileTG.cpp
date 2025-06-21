@@ -2,7 +2,6 @@
 
 #include "ProjectileTG.h"
 #include "TheGame/TheGame.h"
-#include "Components/SphereComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
@@ -14,21 +13,32 @@
 AProjectileTG::AProjectileTG()
 {
 	TRACE("")
-	ProjectileFX = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ProjectileEffect"));
-	SetRootComponent(ProjectileFX);
-	CollisionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("ProjectileCollisionObject"));
-	CollisionSphere->SetupAttachment(ProjectileFX);
-	CollisionSphere->SetRelativeScale3D(FVector(0.2125f, 0.2125f, 0.2125f));
-	
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	ProjectileMesh = CreateDefaultSubobject<UMeshComponent>(TEXT("ProjectileMeshTG"));
+	SetRootComponent(ProjectileMesh);
+	CollisionShape = CreateDefaultSubobject<UShapeComponent>(TEXT("ProjectileCollisionShapeTG"));
+	// CollisionShape->SetRelativeScale3D(FVector(0.2125f, 0.2125f, 0.2125f));
+	// GetRootComponent()->SetupAttachment(CollisionShape);
+	// ProjectileDirectionArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("ProjectileDirectionArrowTG"));
+	// GetRootComponent()->SetupAttachment(ProjectileDirectionArrow);
+	// ProjectileFX = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ProjectileEffectTG"));
+	// GetRootComponent()->SetupAttachment(ProjectileFX);
+	// ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponentTG"));
+	// ProjectileMovement->UpdatedComponent = CollisionShape;
+	//ProjectileMovement->InitialSpeed = 5000.f;
+	//ProjectileMovement->MaxSpeed = 6000.f;
+	//ProjectileMovement->bRotationFollowsVelocity = true;
+	//ProjectileMovement->bShouldBounce = false;
+	// InitialLifeSpan = 5.0f;
+	// TRACE("Projectile created")
 }
 
 // Called when the game starts or when spawned
 void AProjectileTG::BeginPlay()
 {
 	Super::BeginPlay();
-	CollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &AProjectileTG::BeginOverlap);
+	CollisionShape->OnComponentBeginOverlap.AddDynamic(this, &AProjectileTG::BeginOverlap);
 }
 
 void AProjectileTG::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

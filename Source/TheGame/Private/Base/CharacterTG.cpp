@@ -4,7 +4,7 @@
 #include "CharacterTG.h"
 #include "TheGame/TheGame.h"
 #include "GameFramework/PawnMovementComponent.h"
-#include "DroneHudTG.h"
+#include "Actors/DroneHudTG.h"
 #include "PlayerControllerTG.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
