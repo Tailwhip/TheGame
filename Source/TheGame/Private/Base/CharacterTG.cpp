@@ -4,7 +4,7 @@
 #include "CharacterTG.h"
 #include "TheGame/TheGame.h"
 #include "GameFramework/PawnMovementComponent.h"
-#include "DroneHudTG.h"
+#include "Actors/DroneHudTG.h"
 #include "PlayerControllerTG.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -95,34 +95,75 @@ void ACharacterTG::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 void ACharacterTG::ShootProjectile() const
 {
 	TRACE("")
-	if (ProjectileClass)
-	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Instigator = ThisCharacter;
-		if (ThisCharacter)
-			TRACE("ThisCharacter exists")
-		else
-		{
-			TRACEERROR("ThisCharacter not exists!")
-		}
-		// TODO: Setup SpawnParams like SpawnCollisionHandlingOverride or OverrideLevel
-		// FVector SpawnLocation = Camera->GetComponentLocation();
-		// SpawnLocation.X += 200.f;
-		// SpawnLocation.Z -= 50.f;
-		FRotator SpawnRotation = ProjectileSpawnPoint->GetComponentRotation();
-		SpawnRotation.Yaw += 20.f;
-		GetWorld()->SpawnActor<AProjectileTG>(
-			ProjectileClass,
-			ProjectileSpawnPoint->GetComponentLocation(),
-			ProjectileSpawnPoint->GetComponentRotation(),
-			SpawnParams);
-		// GetWorld()->SpawnActor<AProjectileTG>(ProjectileClass, Camera->GetComponentTransform());
-		TRACE("Created projectile")
-	}
-	else
+
+	if (!ProjectileClass)
 	{
 		TRACEERROR("Projectile class is missing in blueprint!")
+		return;
 	}
+	if (!GetWorld())
+	{
+		TRACEERROR("Could not get the world!")
+		return;
+	}
+
+	// 1. Camera view (UE 5.7-safe)
+	FVector CameraLocation;
+	FRotator CameraRotation;
+	GetActorEyesViewPoint(CameraLocation, CameraRotation);
+
+	// 2. Camera trace
+	FVector TraceStart = CameraLocation;
+	FVector TraceEnd = TraceStart + (CameraRotation.Vector() * TraceDistance);
+
+	FHitResult Hit;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.bTraceComplex = true;
+
+	FVector AimPoint = TraceEnd;
+
+	if (GetWorld()->LineTraceSingleByChannel(
+		Hit,
+		TraceStart,
+		TraceEnd,
+		ECC_Visibility,
+		Params))
+	{
+		TRACE("AimPoint taken from hit!")
+		AimPoint = Hit.ImpactPoint;
+	}
+
+	// 3. Muzzle socket
+	FVector MuzzleLocation = GetMesh()->GetSocketLocation(TEXT("Muzzle"));
+
+	// 4. Direction correction
+	FVector ShotDirection = (AimPoint - MuzzleLocation).GetSafeNormal();
+	FRotator SpawnRotation = ShotDirection.Rotation();
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Instigator = ThisCharacter;
+	SpawnParams.Owner = ThisCharacter;
+	if (!ThisCharacter)
+	{
+		TRACEERROR("ThisCharacter not exists!")
+		return;
+	}
+	// TODO: Setup SpawnParams like SpawnCollisionHandlingOverride or OverrideLevel
+	// FVector SpawnLocation = Camera->GetComponentLocation();
+	// SpawnLocation.X += 200.f;
+	// SpawnLocation.Z -= 50.f;
+	//FRotator SpawnRotation = CameraBoom->GetComponentRotation();
+	SpawnRotation.Pitch += 5.f;
+	SpawnRotation.Yaw += 1.f;
+	GetWorld()->SpawnActor<AProjectileTG>(
+		ProjectileClass,
+		MuzzleLocation,
+		SpawnRotation,
+		SpawnParams
+	);
+	// GetWorld()->SpawnActor<AProjectileTG>(ProjectileClass, Camera->GetComponentTransform());
+	TRACE("Created projectile")
 }
 
 float ACharacterTG::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,

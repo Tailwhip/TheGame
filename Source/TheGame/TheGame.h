@@ -24,14 +24,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogTheGame, All, All);
 { \
     SET_WARN_COLOR( COLOR_CYAN );\
     const FString Msg = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
-    if (Msg == "") \
-    { \
-        UE_LOG(LogTheGame, Log, TEXT("%s() : %s"), FUNC_NAME, *GetNameSafe(this));\
-    } \
-    else \
-    { \
-        UE_LOG(LogTheGame, Log, TEXT("%s() : %s"), FUNC_NAME, *Msg);\
-    } \
+    UE_LOG(LogTheGame, Log, TEXT("%s() : %s"), FUNC_NAME, *Msg);\
     CLEAR_WARN_COLOR();\
 }
 
@@ -62,16 +55,5 @@ DECLARE_LOG_CATEGORY_EXTERN(LogTheGame, All, All);
 #define SCREENDEBUG(Format, ...) \
 { \
     const FString Msg = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
-    if (Msg == "") \
-    { \
-        TCHAR StdMsg[MAX_SPRINTF] = TEXT(""); \
-        FCString::Sprintf(StdMsg, TEXT("%s() : %s"), FUNC_NAME, *GetNameSafe(this)); \
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::White, StdMsg); \
-    } \
-    else \
-    { \
-        GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::White, Msg); \
-    } \
+    GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::BLUE, Msg); \
 }
-
-// std::string to_hex_str(uint8 hex_val);

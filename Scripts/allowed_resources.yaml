@@ -1,0 +1,11 @@
+files:
+  - .gitignore
+  - .git
+  - TheGame.uproject
+directories:
+  - .github
+  - Config
+  - Content
+  - Source
+  - Scripts
+  - venv
