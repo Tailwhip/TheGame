@@ -18,7 +18,7 @@ public:
 	// Sets default values for this character's properties
 	ACharacterTG();
 	virtual void BeginPlay() override;
-	virtual  void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	// Called to bind functionality to input

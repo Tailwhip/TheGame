@@ -1,12 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ProjectileTG.h"
-#include "TheGame/TheGame.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
 #include "GameFramework/GameModeBase.h"
+#include "Components/SphereComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Utils/UtilsTG.h"
+#include "TheGame/TheGame.h"
 
 
 // Sets default values
@@ -15,23 +17,43 @@ AProjectileTG::AProjectileTG()
 	TRACE("")
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	ProjectileMesh = CreateDefaultSubobject<UMeshComponent>(TEXT("ProjectileMeshTG"));
-	SetRootComponent(ProjectileMesh);
-	CollisionShape = CreateDefaultSubobject<UShapeComponent>(TEXT("ProjectileCollisionShapeTG"));
-	// CollisionShape->SetRelativeScale3D(FVector(0.2125f, 0.2125f, 0.2125f));
-	// GetRootComponent()->SetupAttachment(CollisionShape);
-	// ProjectileDirectionArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("ProjectileDirectionArrowTG"));
-	// GetRootComponent()->SetupAttachment(ProjectileDirectionArrow);
-	// ProjectileFX = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ProjectileEffectTG"));
-	// GetRootComponent()->SetupAttachment(ProjectileFX);
-	// ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponentTG"));
-	// ProjectileMovement->UpdatedComponent = CollisionShape;
-	//ProjectileMovement->InitialSpeed = 5000.f;
-	//ProjectileMovement->MaxSpeed = 6000.f;
-	//ProjectileMovement->bRotationFollowsVelocity = true;
-	//ProjectileMovement->bShouldBounce = false;
-	// InitialLifeSpan = 5.0f;
-	// TRACE("Projectile created")
+
+	CollisionShape = UtilsTG::CreateDefaultSubobject<UShapeComponent, USphereComponent>(
+		this, TEXT("ProjectileCollisionShapeTG"), CollisionShapeType
+	);
+	RootComponent = CollisionShape;
+	TRACE("CollisionShape (Root) created!")
+
+	InitComponents();
+}
+
+void AProjectileTG::InitComponents()
+{
+	ProjectileMesh = UtilsTG::CreateDefaultSubobject<UMeshComponent, UStaticMeshComponent>(
+		this, TEXT("ProjectileMeshTG"), ProjectileMeshType
+	);
+	ProjectileMesh->SetupAttachment(RootComponent);
+
+	ProjectileDirectionArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("ProjectileDirectionArrowTG"));
+	ProjectileDirectionArrow->SetupAttachment(RootComponent);
+	ProjectileDirectionArrow->bHiddenInGame = true;
+
+	//ProjectileFX = UtilsTG::CreateDefaultSubobject<UNiagaraComponent, UNiagaraComponent>(
+	//	this, TEXT("ProjectileEffectTG"), ProjectileFXType
+	//);
+	ProjectileFX = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ProjectileEffectTG"));
+	ProjectileFX->SetupAttachment(RootComponent);
+
+	ProjectileMovement = UtilsTG::CreateDefaultSubobject<UProjectileMovementComponent, UProjectileMovementComponent>(
+		 this, TEXT("ProjectileMovementComponentTG"), ProjectileMovementType
+	);
+	ProjectileMovement->InitialSpeed = 5000.f;
+	ProjectileMovement->MaxSpeed = 6000.f;
+	ProjectileMovement->bRotationFollowsVelocity = true;
+	ProjectileMovement->bShouldBounce = false;
+	InitialLifeSpan = 5.0f;
+
+	TRACE("Components initialized")
 }
 
 // Called when the game starts or when spawned
@@ -39,6 +61,11 @@ void AProjectileTG::BeginPlay()
 {
 	Super::BeginPlay();
 	CollisionShape->OnComponentBeginOverlap.AddDynamic(this, &AProjectileTG::BeginOverlap);
+}
+
+void AProjectileTG::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
 }
 
 void AProjectileTG::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
