@@ -35,27 +35,30 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class USpringArmComponent* CameraBoom;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input", meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* DefaultMappingContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input", meta = (AllowPrivateAccess = "true"))
 	class APlayerControllerTG* PlayerController;
 	
 protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UDroneHudTG> DroneHudClass{nullptr};
-	
+
 	UPROPERTY()
 	class UDroneHudTG* DroneHud{nullptr};
-	
-	UPROPERTY(EditAnywhere, Category = Projectile)
+
+	UPROPERTY(EditAnywhere, Category="Projectile")
 	TSubclassOf<class AProjectileTG> ProjectileClass{nullptr};
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category="Projectile")
+	float TraceDistance = 100000.f;
+
+	UPROPERTY(EditAnywhere, Category="Stats")
 	float HP{100.0};
 
 	ACharacterTG* ThisCharacter{nullptr};
-	
+
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
 		class AController* EventInstigator, AActor* DamageCauser) override;
 };
