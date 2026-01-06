@@ -9,6 +9,7 @@
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 
 // #include "UniversalObjectLocators/UniversalObjectLocatorUtils.h"
 
@@ -42,16 +43,27 @@ ACharacterTG::ACharacterTG() : Super()
 		FAttachmentTransformRules::KeepRelativeTransform);
 	ProjectileSpawnPoint->SetRelativeLocation(FVector(200.f, 0.f,0.f));
 
+	GetMesh()->SetGenerateOverlapEvents(false);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
+	GetMesh()->SetNotifyRigidBodyCollision(false);
+
+	GetCapsuleComponent()->SetNotifyRigidBodyCollision(false); // Simulation Generates Hit Events
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
+	// GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Overlap);
+	// GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Overlap);
+
+
+
 	if (IsLocallyControlled())
 	{
 		PlayerController = CreateDefaultSubobject<APlayerControllerTG>(TEXT("Camera"));
-			// GetController<APlayerControllerTGBase>();
 	}
 	
 	DroneHud = CreateWidget<UDroneHudTG>(PlayerController, DroneHudClass);
-	// check(DroneHud);
-	if (DroneHud) 
-		DroneHud->AddToPlayerScreen();
+	if (DroneHud) DroneHud->AddToPlayerScreen();
+
 	ThisCharacter = this;
 }
 
@@ -65,7 +77,6 @@ void ACharacterTG::BeginPlay()
 		GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 		GetMovementComponent()->GetNavAgentPropertiesRef().bCanFly = true;
 	}
-	
 }
 
 void ACharacterTG::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -170,8 +181,8 @@ float ACharacterTG::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 	class AController* EventInstigator, AActor* DamageCauser)
 {
 	TRACE("")
-	HP -= DamageAmount;
-	if (0 >= HP)
+	HealthPoints -= DamageAmount;
+	if (0 >= HealthPoints)
 	{
 		TRACE("I'm dead!")
 		Destroy();

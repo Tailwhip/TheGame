@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "ActorTG.h"
-#include "Components/MeshComponent.h"
-#include "Components/ShapeComponent.h"
-#include "Components/ArrowComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "ProjectileTG.generated.h"
+
+class UMeshComponent;
+class UShapeComponent;
+class UArrowComponent;
 
 
 UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
@@ -65,6 +66,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+private:
 	UFUNCTION()
 	void BeginOverlap(
 		UPrimitiveComponent* OverlappedComponent,

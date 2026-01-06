@@ -35,10 +35,10 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	class USpringArmComponent* CameraBoom;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* DefaultMappingContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	class APlayerControllerTG* PlayerController;
 	
 protected:
@@ -48,14 +48,20 @@ protected:
 	UPROPERTY()
 	class UDroneHudTG* DroneHud{nullptr};
 
-	UPROPERTY(EditAnywhere, Category="Projectile")
+	UPROPERTY(EditAnywhere, Category = "Projectile")
 	TSubclassOf<class AProjectileTG> ProjectileClass{nullptr};
 
-	UPROPERTY(EditAnywhere, Category="Projectile")
+	UPROPERTY(EditAnywhere, Category = "Projectile")
 	float TraceDistance = 100000.f;
 
-	UPROPERTY(EditAnywhere, Category="Stats")
-	float HP{100.0};
+	UPROPERTY(EditAnywhere, Category = "Stats")
+	float HealthPoints{100.0};
+
+	UPROPERTY(EditAnywhere, Category = "Stats")
+	float AttackPower{ 10.0 };
+
+	UPROPERTY(EditAnywhere, Category = "Features")
+	bool IsDestroyable{ false };
 
 	ACharacterTG* ThisCharacter{nullptr};
 

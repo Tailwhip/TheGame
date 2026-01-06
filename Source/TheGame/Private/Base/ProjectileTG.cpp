@@ -6,6 +6,9 @@
 #include "NiagaraFunctionLibrary.h"
 #include "GameFramework/GameModeBase.h"
 #include "Components/SphereComponent.h"
+#include "Components/MeshComponent.h"
+#include "Components/ShapeComponent.h"
+#include "Components/ArrowComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Utils/UtilsTG.h"
 #include "TheGame/TheGame.h"
@@ -14,7 +17,6 @@
 // Sets default values
 AProjectileTG::AProjectileTG()
 {
-	TRACE("")
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -22,6 +24,20 @@ AProjectileTG::AProjectileTG()
 		this, TEXT("ProjectileCollisionShapeTG"), CollisionShapeType
 	);
 	RootComponent = CollisionShape;
+	// Overlap-based collision
+	CollisionShape->SetGenerateOverlapEvents(true);
+	CollisionShape->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CollisionShape->SetCollisionProfileName(TEXT("OverlapAll"));
+
+	CollisionShape->SetCollisionResponseToAllChannels(ECR_Overlap);
+	// CollisionShape->SetCollisionResponseToChannel(ECC_Destructible, ECR_Overlap);
+	// CollisionShape->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	// CollisionShape->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
+	// CollisionShape->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
+
+	// Optional but recommended
+	CollisionShape->SetCollisionObjectType(ECC_WorldDynamic); // Projectile channel
+
 	TRACE("CollisionShape (Root) created!")
 
 	InitComponents();
@@ -33,6 +49,10 @@ void AProjectileTG::InitComponents()
 		this, TEXT("ProjectileMeshTG"), ProjectileMeshType
 	);
 	ProjectileMesh->SetupAttachment(RootComponent);
+	ProjectileMesh->SetGenerateOverlapEvents(false);
+	ProjectileMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ProjectileMesh->SetCollisionProfileName(TEXT("NoCollision"));
+	ProjectileMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
 
 	ProjectileDirectionArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("ProjectileDirectionArrowTG"));
 	ProjectileDirectionArrow->SetupAttachment(RootComponent);
@@ -73,6 +93,11 @@ void AProjectileTG::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 {
 	TRACE("OverlappedComponent: %s, OtherComponent: %s",
 		*OverlappedComponent->GetName(), *OtherComponent->GetName())
+	if (!OtherActor || OtherActor == GetOwner())
+	{
+		TRACEERROR("No other actor found!")
+		return;
+	}
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactParticles, GetActorLocation());
 	OnHit(OtherActor);
 	Destroy();
