@@ -10,8 +10,6 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine",
-				"LearningAgents",
-				"MLAdapter",
 				"UMG"
 			]
 		}
@@ -23,14 +21,6 @@
 			"TargetAllowList": [
 				"Editor"
 			]
-		},
-		{
-			"Name": "MLAdapter",
-			"Enabled": true
-		},
-		{
-			"Name": "LearningAgents",
-			"Enabled": true
 		}
 	]
 }

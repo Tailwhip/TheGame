@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
 class THEGAME_API ADroneTG : public ACharacterTG
 {
 	GENERATED_BODY()

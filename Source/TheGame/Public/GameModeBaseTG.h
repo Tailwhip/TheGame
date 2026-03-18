@@ -13,12 +13,14 @@ UCLASS()
 class THEGAME_API AGameModeBaseTG : public AGameModeBase
 {
 	GENERATED_BODY()
-
 public:
 	AGameModeBaseTG();
 	~AGameModeBaseTG() = default;
 
-	void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;
+	void InitGame(
+		const FString& MapName, 
+		const FString& Options, 
+		FString& ErrorMessage) override;
 
 // private:
 	// UPROPERTY()

@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ActorsSpawnerTG.h"
-#include "ProjectilesSpawnerTG.generated.h"
+#include "Base/HudTG.h"
+#include "DefaultHudTG.generated.h"
 
 /**
  * 
  */
 UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
-class THEGAME_API AProjectilesSpawnerTG : public AActorsSpawnerTG
+class THEGAME_API ADefaultHudTG : public AHudTG
 {
 	GENERATED_BODY()
 	

@@ -3,24 +3,25 @@
 
 #include "CharacterTG.h"
 #include "TheGame/TheGame.h"
-#include "GameFramework/PawnMovementComponent.h"
-#include "Actors/DroneHudTG.h"
-#include "PlayerControllerTG.h"
 #include "Blueprint/UserWidget.h"
-#include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/PawnMovementComponent.h"
+#include "Actors/DroneHudTG.h"
+#include "Pooling/ActorsSpawnerComponentTG.h"
+#include "Base/PlayerControllerTG.h"
+#include "GameFramework/SpringArmComponent.h"
 
 // #include "UniversalObjectLocators/UniversalObjectLocatorUtils.h"
 
 // Sets default values
-ACharacterTG::ACharacterTG() : Super()
+ACharacterTG::ACharacterTG():
+	Super()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	TRACE("Setting up a camera...")
-	
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->SetUsingAbsoluteRotation(false); // Rotate with character
@@ -32,16 +33,11 @@ ACharacterTG::ACharacterTG() : Super()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	Camera->bUsePawnControlRotation = true; // Enables moves up and down with camera
-	
-	// Camera->RegisterComponent();
-	// Camera->AttachToComponent(RootComponent.Get(), FAttachmentTransformRules::KeepRelativeTransform);
-	// Camera->CreationMethod = EComponentCreationMethod::Instance;
-	// Camera->SetRelativeLocation(FVector(-382.0, 0.0,102.0));
-	
+		
 	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("ProjectileSpawnPoint"));
 	ProjectileSpawnPoint->AttachToComponent(RootComponent.Get(),
 		FAttachmentTransformRules::KeepRelativeTransform);
-	ProjectileSpawnPoint->SetRelativeLocation(FVector(200.f, 0.f,0.f));
+	ProjectileSpawnPoint->SetRelativeLocation(FVector(300.f, 0.f,0.f));
 
 	GetMesh()->SetGenerateOverlapEvents(false);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -51,10 +47,9 @@ ACharacterTG::ACharacterTG() : Super()
 	GetCapsuleComponent()->SetNotifyRigidBodyCollision(false); // Simulation Generates Hit Events
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
-	// GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECR_Overlap);
-	// GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Overlap);
 
-
+	ProjectileSpawnerComponent =
+		CreateDefaultSubobject<UActorsSpawnerComponentTG>(TEXT("ProjectileSpawner"));
 
 	if (IsLocallyControlled())
 	{
@@ -77,6 +72,9 @@ void ACharacterTG::BeginPlay()
 		GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 		GetMovementComponent()->GetNavAgentPropertiesRef().bCanFly = true;
 	}
+
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ACharacterTG::BeginOverlap);
+	TRACE("BeginOverlap has been binded")
 }
 
 void ACharacterTG::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -96,6 +94,13 @@ void ACharacterTG::Tick(float DeltaTime)
 	
 }
 
+void ACharacterTG::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	TRACE("OverlappedComponent: %s, OtherComponent: %s",
+		*OverlappedComponent->GetName(), *OtherComponent->GetName())
+}
+
 // Called to bind functionality to input
 void ACharacterTG::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -107,11 +112,6 @@ void ACharacterTG::ShootProjectile() const
 {
 	TRACE("")
 
-	if (!ProjectileClass)
-	{
-		TRACEERROR("Projectile class is missing in blueprint!")
-		return;
-	}
 	if (!GetWorld())
 	{
 		TRACEERROR("Could not get the world!")
@@ -161,19 +161,13 @@ void ACharacterTG::ShootProjectile() const
 		return;
 	}
 	// TODO: Setup SpawnParams like SpawnCollisionHandlingOverride or OverrideLevel
-	// FVector SpawnLocation = Camera->GetComponentLocation();
-	// SpawnLocation.X += 200.f;
-	// SpawnLocation.Z -= 50.f;
-	//FRotator SpawnRotation = CameraBoom->GetComponentRotation();
+
 	SpawnRotation.Pitch += 5.f;
 	SpawnRotation.Yaw += 1.f;
-	GetWorld()->SpawnActor<AProjectileTG>(
-		ProjectileClass,
-		MuzzleLocation,
-		SpawnRotation,
-		SpawnParams
-	);
-	// GetWorld()->SpawnActor<AProjectileTG>(ProjectileClass, Camera->GetComponentTransform());
+	ProjectileSpawnerComponent->SpawnActor(
+		FTransform(SpawnRotation, MuzzleLocation),
+		SpawnParams);
+	
 	TRACE("Created projectile")
 }
 

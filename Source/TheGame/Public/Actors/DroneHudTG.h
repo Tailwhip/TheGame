@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS(Abstract)
+UCLASS(BlueprintType, Blueprintable)
 class THEGAME_API UDroneHudTG : public UUserWidget
 {
 	GENERATED_BODY()
