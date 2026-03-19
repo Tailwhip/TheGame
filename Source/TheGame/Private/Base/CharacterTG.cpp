@@ -7,9 +7,9 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
-#include "Actors/DroneHudTG.h"
-#include "Pooling/ActorsSpawnerComponentTG.h"
 #include "Base/PlayerControllerTG.h"
+#include "Pooling/ActorsSpawnerComponentTG.h"
+#include "UI/CharacterHUDWidgetTG.h"
 #include "GameFramework/SpringArmComponent.h"
 
 // #include "UniversalObjectLocators/UniversalObjectLocatorUtils.h"
@@ -51,13 +51,7 @@ ACharacterTG::ACharacterTG():
 	ProjectileSpawnerComponent =
 		CreateDefaultSubobject<UActorsSpawnerComponentTG>(TEXT("ProjectileSpawner"));
 
-	if (IsLocallyControlled())
-	{
-		PlayerController = CreateDefaultSubobject<APlayerControllerTG>(TEXT("Camera"));
-	}
-	
-	DroneHud = CreateWidget<UDroneHudTG>(PlayerController, DroneHudClass);
-	if (DroneHud) DroneHud->AddToPlayerScreen();
+	PlayerController = CreateDefaultSubobject<APlayerControllerTG>(TEXT("PlayerController"));
 
 	ThisCharacter = this;
 }
@@ -75,15 +69,27 @@ void ACharacterTG::BeginPlay()
 
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ACharacterTG::BeginOverlap);
 	TRACE("BeginOverlap has been binded")
+
+	if (!PlayerController)
+		PlayerController = Cast<APlayerControllerTG>(GetController());
+	if (!PlayerController) TRACEWARN("PlayerController is null!")
+	if (!HUDClass) TRACEWARN("No HUDClass has been set!")
+	HUDWidget = CreateWidget<UCharacterHUDWidgetTG>(PlayerController, HUDClass);
+	if (HUDWidget) HUDWidget->AddToPlayerScreen();
+	else TRACEWARN("No HUDWidget has been set!");
+
+	MaxHealth = HealthPoints;
+	OnHealthChanged(MaxHealth);
+
 }
 
 void ACharacterTG::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	if (DroneHud)
+	if (HUDWidget)
 	{
-		DroneHud->RemoveFromParent();
-		DroneHud = nullptr;
+		HUDWidget->RemoveFromParent();
+		HUDWidget = nullptr;
 	}
 }
 
@@ -171,15 +177,35 @@ void ACharacterTG::ShootProjectile() const
 	TRACE("Created projectile")
 }
 
-float ACharacterTG::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
-	class AController* EventInstigator, AActor* DamageCauser)
+void ACharacterTG::OnHealthChanged(float NewHealth)
 {
-	TRACE("")
-	HealthPoints -= DamageAmount;
-	if (0 >= HealthPoints)
+	if (HUDWidget)
 	{
-		TRACE("I'm dead!")
-		Destroy();
+		HUDWidget->SetHealth(NewHealth, MaxHealth);
+	}
+}
+
+void ACharacterTG::OnDeath()
+{
+	TRACE("%s character is dead!", *ThisCharacter->GetName())
+	Destroy();
+}
+
+float ACharacterTG::TakeDamage(
+	float DamageAmount,
+	struct FDamageEvent 
+	const& DamageEvent,
+	class AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	TRACE("%s is taking damage: %f", *ThisCharacter->GetName(), DamageAmount)
+	if (!bIsDestroyable)
+		TRACE("%s character is immortal!", *ThisCharacter->GetName())
+	else
+	{
+		HealthPoints -= DamageAmount;
+		OnHealthChanged(HealthPoints);
+		if (0 >= HealthPoints) OnDeath();
 	}
 	return Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }

@@ -27,11 +27,14 @@ public:
 		class UInputComponent* PlayerInputComponent) override;
 	
 	void ShootProjectile() const;
+	void OnHealthChanged(float NewHealth);
+	//void OnAmmoChanged(int32 Ammo);
+	void OnDeath();
 
-	UPROPERTY(EditDefaultsOnly, Category = "ProjectileTG")
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	class USceneComponent* ProjectileSpawnPoint;
 
-	UPROPERTY(EditDefaultsOnly, Category = "ProjectileTG")
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	class UActorsSpawnerComponentTG* ProjectileSpawnerComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
@@ -41,31 +44,31 @@ public:
 	class USpringArmComponent* CameraBoom;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, 
-		Category = "InputTG", meta = (AllowPrivateAccess = "true"))
+		Category = "CharacterTG", meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* DefaultMappingContext;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, 
-		Category = "InputTG", meta = (AllowPrivateAccess = "true"))
+		Category = "CharacterTG", meta = (AllowPrivateAccess = "true"))
 	class APlayerControllerTG* PlayerController;
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
-	TSubclassOf<class UDroneHudTG> DroneHudClass{nullptr};
+	TSubclassOf<class UCharacterHUDWidgetTG> HUDClass{nullptr};
+
+	UPROPERTY()
+	class UCharacterHUDWidgetTG* HUDWidget{nullptr};
 
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
-	class UDroneHudTG* DroneHud{nullptr};
-
-	UPROPERTY(EditDefaultsOnly, Category = "ProjectileTG")
 	float TraceDistance = 100000.f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "StatsTG")
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	float HealthPoints{100.0};
-
-	UPROPERTY(EditDefaultsOnly, Category = "StatsTG")
+	
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	float AttackPower{ 10.0 };
 
-	UPROPERTY(EditDefaultsOnly, Category = "FeaturesTG")
-	bool IsDestroyable{ false };
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
+	bool bIsDestroyable{ true };
 
 	ACharacterTG* ThisCharacter{nullptr};
 
@@ -78,6 +81,11 @@ protected:
 		bool bFromSweep,
 		const FHitResult& SweepResult);
 
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
-		class AController* EventInstigator, AActor* DamageCauser) override;
+	virtual float TakeDamage(
+		float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		class AController* EventInstigator,
+		AActor* DamageCauser) override;
+private:
+	float MaxHealth;
 };

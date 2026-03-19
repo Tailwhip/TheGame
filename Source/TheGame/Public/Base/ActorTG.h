@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "ActorTG.generated.h"
 
-UCLASS(BlueprintType, Blueprintable, Abstract)
+UCLASS(Abstract)
 class THEGAME_API AActorTG : public AActor
 {
 	GENERATED_BODY()
