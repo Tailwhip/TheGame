@@ -11,7 +11,11 @@ namespace UtilsTG
 {
 
 template<class TReturnType, class TClassToConstructByDefault>
-TReturnType* CreateDefaultSubobject(UObject* Owner, FName SubobjectName, TSubclassOf<TReturnType> CustomObjectType, bool bTransient = false)
+TReturnType* CreateDefaultSubobject(
+	UObject* Owner, 
+	FName SubobjectName, 
+	TSubclassOf<TReturnType> CustomObjectType,
+	bool bTransient = false)
 {
 	TRACE("")
 	// Cast required so we can call protected CreateDefaultSubobject
@@ -21,7 +25,8 @@ TReturnType* CreateDefaultSubobject(UObject* Owner, FName SubobjectName, TSubcla
 		? CustomObjectType
 		: TSubclassOf<TReturnType>(TClassToConstructByDefault::StaticClass());
 	return static_cast<TReturnType*>(
-		TypedOwner->CreateDefaultSubobject(SubobjectName, ObjectType, ObjectType, /*bIsRequired =*/ true, false)
+		TypedOwner->CreateDefaultSubobject(
+			SubobjectName, ObjectType, ObjectType, /*bIsRequired =*/ true, false)
 	);
 }
 

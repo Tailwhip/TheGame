@@ -5,9 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "ProjectileTG.h"
-
 #include "CharacterTG.generated.h"
 
+
+class UActorsSpawnerComponentTG;
 
 UCLASS(Abstract)
 class THEGAME_API ACharacterTG : public ACharacter
@@ -22,43 +23,69 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-		
+	virtual void SetupPlayerInputComponent(
+		class UInputComponent* PlayerInputComponent) override;
+	
 	void ShootProjectile() const;
+	void OnHealthChanged(float NewHealth);
+	//void OnAmmoChanged(int32 Ammo);
+	void OnDeath();
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	class USceneComponent* ProjectileSpawnPoint;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
+	class UActorsSpawnerComponentTG* ProjectileSpawnerComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	class UCameraComponent* Camera;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	class USpringArmComponent* CameraBoom;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, 
+		Category = "CharacterTG", meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* DefaultMappingContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Input", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, 
+		Category = "CharacterTG", meta = (AllowPrivateAccess = "true"))
 	class APlayerControllerTG* PlayerController;
 	
 protected:
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UDroneHudTG> DroneHudClass{nullptr};
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
+	TSubclassOf<class UCharacterHUDWidgetTG> HUDClass{nullptr};
 
 	UPROPERTY()
-	class UDroneHudTG* DroneHud{nullptr};
+	class UCharacterHUDWidgetTG* HUDWidget{nullptr};
 
-	UPROPERTY(EditAnywhere, Category="Projectile")
-	TSubclassOf<class AProjectileTG> ProjectileClass{nullptr};
-
-	UPROPERTY(EditAnywhere, Category="Projectile")
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	float TraceDistance = 100000.f;
 
-	UPROPERTY(EditAnywhere, Category="Stats")
-	float HP{100.0};
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
+	float HealthPoints{100.0};
+	
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
+	float AttackPower{ 10.0 };
+
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
+	bool bIsDestroyable{ true };
 
 	ACharacterTG* ThisCharacter{nullptr};
 
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
-		class AController* EventInstigator, AActor* DamageCauser) override;
+	UFUNCTION()
+	void BeginOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComponent,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
+
+	virtual float TakeDamage(
+		float DamageAmount,
+		struct FDamageEvent const& DamageEvent,
+		class AController* EventInstigator,
+		AActor* DamageCauser) override;
+private:
+	float MaxHealth;
 };

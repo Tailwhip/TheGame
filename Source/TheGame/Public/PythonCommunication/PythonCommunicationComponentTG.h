@@ -33,6 +33,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ResumeHandlingData();
 
+	UPROPERTY(EditAnywhere)
+	int32 ServerPort{ 7777 };
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -50,11 +52,8 @@ private:
 	FTimerHandle TickTimerHandle;
 	TArray<DroneTrainerCommTG::Signal> CurrentSignalsBuffer;
 	
-	UPROPERTY(EditAnywhere)
-	int32 ServerPort = 7777;
-
 	static DroneTrainerCommTG::RegId CurrRegisterId;
 	bool bShouldHandleData = true;
 	bool bShouldSendData = false;
-	bool isRegistered = false;
+	bool bIsRegistered = false;
 };

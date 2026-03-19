@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "ActorTG.h"
-#include "Components/MeshComponent.h"
-#include "Components/ShapeComponent.h"
-#include "Components/ArrowComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "ProjectileTG.generated.h"
+
+class UMeshComponent;
+class UShapeComponent;
+class UArrowComponent;
 
 
 UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
@@ -17,53 +18,48 @@ class THEGAME_API AProjectileTG : public AActorTG
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AProjectileTG();
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	// Called when the game starts or when spawned
+	void OnConstruction(const FTransform& Transform) override;
+	void BeginPlay() override;
+	void Tick(float DeltaTime) override; // Called every frame
 
-	UPROPERTY(EditDefaultsOnly)
+	void Activate() override;
+	void ResetMovement(FTransform const& Transform) override;
+
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileTG")
 	class UShapeComponent* CollisionShape; // Root
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileTG")
 	TSubclassOf<UShapeComponent> CollisionShapeType;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileTG")
 	class UMeshComponent* ProjectileMesh;
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UMeshComponent> ProjectileMeshType;
-
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileTG")
 	class UArrowComponent* ProjectileDirectionArrow;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileTG")
 	class UNiagaraComponent* ProjectileFX;
 	
-	//UPROPERTY(EditAnywhere)
-	//TSubclassOf<UNiagaraComponent> ProjectileFXType;
-
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileTG")
 	class UNiagaraSystem* ImpactParticles;
 	
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileTG")
 	class UProjectileMovementComponent* ProjectileMovement;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileTG")
 	TSubclassOf<UProjectileMovementComponent> ProjectileMovementType;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileTG")
 	float BaseDamage{10.f};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "ProjectileTG")
 	TSubclassOf<UDamageType> DamageType;
-	
-protected:
-	virtual void InitComponents();
 
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	virtual void OnConstruction(const FTransform& Transform) override;
+private:
+	// Sets default values for this actor's properties
+	void SetupComponents();
 
 	UFUNCTION()
 	void BeginOverlap(

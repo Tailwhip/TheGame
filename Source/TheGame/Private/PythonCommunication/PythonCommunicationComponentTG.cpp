@@ -114,7 +114,7 @@ void UPythonCommunicationComponentTG::ConnectToServer()
 		FTimerDelegate TimerDelegate;
 		TimerDelegate.BindLambda([this]() 
 			{
-				if (isRegistered)
+				if (bIsRegistered)
 					HandleData();
 				else
 					HandleConnection();
@@ -252,7 +252,7 @@ void UPythonCommunicationComponentTG::HandleConnection()
 				msg.RegisterId, static_cast<int>(msg.MessageType), value);
 			if (DroneTrainerCommTG::MsgType::Register == msg.MessageType && 1 == value)
 			{
-				isRegistered = true;
+				bIsRegistered = true;
 				TRACE("Client registered successfully!")
 			}
 		}

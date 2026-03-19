@@ -11,21 +11,23 @@ public class TheGame : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] 
 		{ 
 			"Core", "CoreUObject", "Engine", "InputCore", 
-			"EnhancedInput", "LearningAgents", "LearningAgentsTraining",
-			"Sockets", "Networking", "MLAdapter", "UMG", "Niagara", "Kismet"
+			"EnhancedInput", "Sockets", "Networking", "UMG", "Niagara", "Kismet"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"LearningAgentsTraining", "Sockets", "Networking"
+			"Sockets", "Networking"
 		});
 		
 		PublicIncludePaths.AddRange(new string[]
 		{
 			"C:/Users/Taail/AppData/Local/Programs/Python/Python312/include",
-			"C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Base",
-			"C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/PythonCommunication"
-		});
+            "C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Actors",
+            "C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Base",
+            "C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Pooling",
+			"C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/PythonCommunication",
+            "C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Tools"
+        });
 		
 		PublicAdditionalLibraries.AddRange(new string[]
 		{
