@@ -6,6 +6,7 @@ import argparse
 import threading
 import traceback
 import struct
+from typing import Any, Dict
 from dataclasses import dataclass
 from time import sleep
 from typing import ClassVar
@@ -15,33 +16,40 @@ from ..signal_handler import *
 
 
 msg_types = {
-    "None" : 0,
-	"Register" : 1,     # [Id] [MsgType] [DataLen=1] [SignalDataType=1][SignalData=1/0]...
-	"Snapshot" : 2,     # [Id] [MsgType] [DataLen]   [SignalDataType1][SignalData1]...
-	"Unregister" : 3,   # [Id] [MsgType] [DataLen]   [SignalDataType1][SignalData1]...
-    "Commands" : 4      # [Id] [MsgType] [DataLen]   [SignalDataType1][SignalData1]...
+    "None"       : 0,
+	"Register"   : 1,     # [Id] [MsgType] [DataLen=1] [SignalDataType=1][SignalData=1/0]...
+	"Snapshot"   : 2,     # [Id] [MsgType] [DataLen]   [SignalDataType1][SignalData1]...
+	"Unregister" : 3,     # [Id] [MsgType] [DataLen]   [SignalDataType1][SignalData1]...
+    "Commands"   : 4      # [Id] [MsgType] [DataLen]   [SignalDataType1][SignalData1]...
 }
 
 cmd_value_types = {
-    "None" : 0,
-	"B" : 1, # "UINT8"
-	"H" : 2, # "UINT16"
-	"I" : 3, # "UINT32"
-	"Q" : 4, # "UINT64"
-	"f" : 5, # "FLOAT"
-	"d" : 6, # "DOUBLE"
-	"s" : 7, # "PAYLOAD"
-    "?" : 8  # "BOOL"
+    "None"  : 0,
+	"B"     : 1, # "UINT8"
+	"H"     : 2, # "UINT16"
+	"I"     : 3, # "UINT32"
+	"Q"     : 4, # "UINT64"
+	"f"     : 5, # "FLOAT"
+	"d"     : 6, # "DOUBLE"
+	"s"     : 7, # "PAYLOAD"
+    "?"     : 8  # "BOOL"
 }
 
 
 @dataclass(init=True, eq=True)
 class Signal:
     type: int = cmd_value_types["None"]
-    value: any = 0
+    value: Any = 0
 
     def serialize(self):
-        return self.type.to_bytes(1, "big") + self.value.to_bytes(1, "big")
+        result = self.type.to_bytes(1, "big")
+        if isinstance(self.value, list):
+            result += len(self.value).to_bytes(1, "big")
+            for ch in self.value:
+                result += ch.to_bytes(1, "big")
+        else:
+            result += self.value.to_bytes(1, "big")
+        return result
     
     def deserialize(self, type: int, value: bytes):
         self.type = type
@@ -74,16 +82,12 @@ class Message:
         return data
     
     def deserialize(self, payload):
-        logger.info(f"Deserializing...{payload}")
+        logger.info(f"Deserializing payload: {payload}")
         if len(payload) < 3:
             logger.error(f"Received message is too short!")
             return
         self.client_id = payload[0]
-        self.message_type = payload[0]
+        self.message_type = payload[1]
         for i in range(2, len(payload), 2):
             logger.info(f"{payload[i]}")
             self.signals.append(Signal)
-            
-        
-        
-

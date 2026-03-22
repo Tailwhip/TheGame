@@ -8,8 +8,6 @@
 #include "CharacterTG.generated.h"
 
 
-class UActorsSpawnerComponentTG;
-
 UCLASS(Abstract)
 class THEGAME_API ACharacterTG : public ACharacter
 {
@@ -38,20 +36,24 @@ public:
 	class UActorsSpawnerComponentTG* ProjectileSpawnerComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
+	class UPythonCommunicationComponentTG* PythonCommunicationComponent;
+
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	class UCameraComponent* Camera;
 
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	class USpringArmComponent* CameraBoom;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, 
-		Category = "CharacterTG", meta = (AllowPrivateAccess = "true"))
-	class UInputMappingContext* DefaultMappingContext;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, 
-		Category = "CharacterTG", meta = (AllowPrivateAccess = "true"))
-	class APlayerControllerTG* PlayerController;
-	
 protected:
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CharacterTG")
+	//class UInputMappingContext* DefaultMappingContext;
+
+	UPROPERTY()
+	class APlayerControllerTG* PlayerController;
+
+	UPROPERTY()
+	class AAIControllerTG* AIController;
+
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	TSubclassOf<class UCharacterHUDWidgetTG> HUDClass{nullptr};
 
@@ -59,16 +61,19 @@ protected:
 	class UCharacterHUDWidgetTG* HUDWidget{nullptr};
 
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
-	float TraceDistance = 100000.f;
+	float TraceDistance;
 
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
-	float HealthPoints{100.0};
+	float HealthPoints;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
-	float AttackPower{ 10.0 };
+	float AttackPower;
 
-	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
-	bool bIsDestroyable{ true };
+	UPROPERTY(EditInstanceOnly, Category = "CharacterTG")
+	bool bIsDestroyable;
+
+	UPROPERTY(EditInstanceOnly, Category = "CharacterTG")
+	bool bIsAI;
 
 	ACharacterTG* ThisCharacter{nullptr};
 

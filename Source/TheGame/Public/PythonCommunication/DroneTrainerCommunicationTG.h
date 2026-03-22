@@ -21,7 +21,14 @@ using RegId = uint8;
 using Byte = uint8;
 using Payload = TArray<Byte>;
 using PayloadLen = uint8;
-using SignalVariantType = std::variant<uint8, uint16, uint32, uint64, float, double, Payload>;
+using SignalVariantType = std::variant<
+	uint8,
+	uint16,
+	uint32,
+	uint64,
+	float,
+	double,
+	Payload>;
 	
 enum class MsgType: uint8
 {
@@ -67,12 +74,21 @@ struct Signal
 	SignalValueType Type{SignalValueType::None};
 	SignalVariantType Value{};
 	
+	template<typename T>
+	T* GetValue()
+	{
+		if (Value.valueless_by_exception())
+		{
+			TRACEERROR("Signal Value is empty!")
+			return nullptr;
+		}
+		return std::get_if<T>(&Value);
+	}
 	TTuple<PayloadLen, const Byte*> Serialize();
 	uint32 Deserialize(const Byte* data);
 
 private:
 	Payload Bytes;
-
 	std::map<SignalValueType, uint8> SignalValueTypeSizes =
 	{
 		{SignalValueType::UINT8, 8},
@@ -82,16 +98,15 @@ private:
 		{SignalValueType::FLOAT, 32}, // TODO: Confirm the size
 		{SignalValueType::DOUBLE, 64} // TODO: Confirm the size
 	};
-	
 };
 	
 struct Message
 {
-	Message(RegId regId, MsgType msgType, TArray<Signal>& data);
+	Message(RegId regId, MsgType msgType);
 	
 	RegId RegisterId{0};
 	MsgType MessageType{MsgType::None};
-	TArray<Signal>& Data;
+	TArray<Signal> DataSignals;
 	
 	TTuple<PayloadLen, const Byte*> Serialize();
 	uint32 Deserialize(const Byte* data);

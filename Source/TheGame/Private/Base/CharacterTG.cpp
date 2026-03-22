@@ -2,21 +2,30 @@
 
 
 #include "CharacterTG.h"
-#include "TheGame/TheGame.h"
+
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
-#include "Base/PlayerControllerTG.h"
-#include "Pooling/ActorsSpawnerComponentTG.h"
-#include "UI/CharacterHUDWidgetTG.h"
 #include "GameFramework/SpringArmComponent.h"
+
+#include "TheGame/TheGame.h"
+#include "Base/Controller/AIControllerTG.h"
+#include "Base/Controller/PlayerControllerTG.h"
+#include "Pooling/ActorsSpawnerComponentTG.h"
+#include "PythonCommunication/PythonCommunicationComponentTG.h"
+#include "UI/CharacterHUDWidgetTG.h"
 
 // #include "UniversalObjectLocators/UniversalObjectLocatorUtils.h"
 
 // Sets default values
 ACharacterTG::ACharacterTG():
-	Super()
+	Super(),
+	TraceDistance{ 100000.f },
+	HealthPoints{ 100.0 },
+	AttackPower{ 10.0 },
+	bIsDestroyable{ true },
+	bIsAI{ false }
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -51,7 +60,19 @@ ACharacterTG::ACharacterTG():
 	ProjectileSpawnerComponent =
 		CreateDefaultSubobject<UActorsSpawnerComponentTG>(TEXT("ProjectileSpawner"));
 
-	PlayerController = CreateDefaultSubobject<APlayerControllerTG>(TEXT("PlayerController"));
+	PythonCommunicationComponent =
+		CreateDefaultSubobject<UPythonCommunicationComponentTG>(TEXT("PythonCommunication"));
+
+	if (bIsAI)
+	{
+		AIControllerClass = AAIControllerTG::StaticClass();
+		AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	}
+	else
+	{
+		PlayerController = 
+			CreateDefaultSubobject<APlayerControllerTG>(TEXT("PlayerController"));
+	}
 
 	ThisCharacter = this;
 }
@@ -70,17 +91,25 @@ void ACharacterTG::BeginPlay()
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ACharacterTG::BeginOverlap);
 	TRACE("BeginOverlap has been binded")
 
-	if (!PlayerController)
-		PlayerController = Cast<APlayerControllerTG>(GetController());
-	if (!PlayerController) TRACEWARN("PlayerController is null!")
-	if (!HUDClass) TRACEWARN("No HUDClass has been set!")
-	HUDWidget = CreateWidget<UCharacterHUDWidgetTG>(PlayerController, HUDClass);
-	if (HUDWidget) HUDWidget->AddToPlayerScreen();
-	else TRACEWARN("No HUDWidget has been set!");
+	if (bIsAI)
+	{
+		TRACE("Character %s is AI controlled", *ThisCharacter->GetName())
+		AIController = Cast<AAIControllerTG>(GetController());
+		if (!AIController) TRACEWARN("AIController is null!")
+	}
+	else
+	{
+		if (!PlayerController)
+			PlayerController = Cast<APlayerControllerTG>(GetController());
+		if (!PlayerController) TRACEWARN("PlayerController is null!")
+		if (!HUDClass) TRACEWARN("No HUDClass has been set!")
+		HUDWidget = CreateWidget<UCharacterHUDWidgetTG>(PlayerController, HUDClass);
+		if (HUDWidget) HUDWidget->AddToPlayerScreen();
+		else TRACEWARN("No HUDWidget has been set!");
+	}
 
 	MaxHealth = HealthPoints;
 	OnHealthChanged(MaxHealth);
-
 }
 
 void ACharacterTG::EndPlay(const EEndPlayReason::Type EndPlayReason)

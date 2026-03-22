@@ -2,7 +2,6 @@
 
 #pragma once
 
-// #include "Python.h"
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "DroneTrainerCommunicationTG.h"
@@ -21,39 +20,43 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 		FActorComponentTickFunction* ThisTickFunction) override;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, Category = "PythonCommunicationComponentTG")
 	FString ReceivedData;
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "PythonCommunicationComponentTG")
 	void OnReceivedDataChanged();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "PythonCommunicationComponentTG")
 	void PauseHandlingData();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "PythonCommunicationComponentTG")
 	void ResumeHandlingData();
 
-	UPROPERTY(EditAnywhere)
-	int32 ServerPort{ 7777 };
+	UPROPERTY(EditAnywhere, Category = "PythonCommunicationComponentTG")
+	int32 ServerPort;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 private:
-	void HandleData();
-	void HandleConnection();
-	void SendMessage(DroneTrainerCommTG::Message& Message);
-	void ConnectToServer();
+	bool HandleData();
+	bool HandleConnection();
+	bool SendMessage(DroneTrainerCommTG::Message& Message);
+	bool ConnectToServer();
 	void EndConnection();
+	bool ReceiveMessage(DroneTrainerCommTG::Message& MessageContainer);
 
 	FSocket* ClientSocket;
 	// FSocket* ReceivingSocket;
+	// Initializes a timer to periodically handle incoming data from connected clients (Python script).
+	FTimerDelegate TimerDelegate;
 	FTimerHandle TickTimerHandle;
 	TArray<DroneTrainerCommTG::Signal> CurrentSignalsBuffer;
 	
 	static DroneTrainerCommTG::RegId CurrRegisterId;
-	bool bShouldHandleData = true;
-	bool bShouldSendData = false;
-	bool bIsRegistered = false;
+	DroneTrainerCommTG::RegId RegisterId;
+	bool bShouldHandleData;
+	bool bShouldSendData;
+	bool bIsRegistered;
 };

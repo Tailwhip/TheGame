@@ -113,10 +113,9 @@ uint32 Signal::Deserialize(const Byte* data)
 }
 
 	
-Message::Message(RegId regId, MsgType msgType, TArray<Signal>& data):
+Message::Message(RegId regId, MsgType msgType):
 	RegisterId(regId),
-	MessageType(msgType),
-	Data(data)
+	MessageType(msgType)
 {
 }
 
@@ -126,14 +125,13 @@ TTuple<PayloadLen, const Byte*> Message::Serialize()
 	Bytes.Empty();
 	Bytes.Append(ToBytes(RegisterId), sizeof(RegId));
 	Bytes.Append(ToBytes(MessageType), sizeof(MsgType));
-	PayloadLen Len = Data.Num();
+	PayloadLen Len = DataSignals.Num();
 	Bytes.Append(ToBytes(Len), sizeof(PayloadLen));
-	for (auto Signal: Data)
+	for (auto Signal: DataSignals)
 	{
 		TTuple<PayloadLen, const Byte*> s = Signal.Serialize();
 		Bytes.Append(ToBytes(s.Value), sizeof(s.Key));
 	}
-	
 	return {Bytes.Num(), Bytes.GetData()};
 }
 
@@ -160,10 +158,9 @@ uint32 Message::Deserialize(const Byte* data)
 		memcpy( sigBuf , data + currBufPos, bufLen * sizeof(Byte) );
 		Signal sig;
 		currBufPos += sig.Deserialize(sigBuf);
-		Data.Add(std::move(sig));
+		DataSignals.Add(std::move(sig));
 		free(sigBuf);
 	}
-	
 	return currBufPos;
 }
 

@@ -5,6 +5,8 @@ import sys
 import argparse
 from threading import Thread, Lock
 import traceback
+import struct
+from typing import Any, Dict
 from time import sleep
 from queue import Queue
 
@@ -19,7 +21,6 @@ MAX_DATA_SIZE = 1024
 @dataclass(init=True, eq=True)
 class Client:
     id: int = 0
-    # connection: st.socket = st.socket
     address: tuple[str, int]=("", 0)
     is_registered: bool = False
     message_to_send: Message = Message
@@ -39,8 +40,11 @@ class UE5Server:
         self._clients = {}
         self._mutex = Lock()
 
+    @property
+    def clients(self) -> Dict:
+        return self._clients
 
-    def __lock_mutex(func):
+    def __lock_mutex(func) -> Any:
         def lock_mutex(self, *args, **kwargs):
             self._mutex.acquire()
             result = func(self, *args, **kwargs)
@@ -49,16 +53,12 @@ class UE5Server:
         return lock_mutex
 
 
-    def start_server(self):
+    def start_server(self) -> None:
         logger.info("Starting the server's threads")
         self.run = True
-        # bind host address and port together
         self._server_socket.bind(("127.0.0.1", self._listening_port))
         self._server_socket.setsockopt(st.SOL_SOCKET, st.SO_REUSEADDR, 1)
         self._server_socket.setblocking(False)
-        # self._connection_thread = Thread(target=self.__wait_for_connection, args=[])
-        # self._connection_thread.start()
-        # sleep(0.5)
         self._receiving_thread = Thread(target=self.__receiving_loop, args=[])
         self._receiving_thread.start()
         sleep(0.5)
@@ -87,9 +87,7 @@ class UE5Server:
             self._sending_thread.join()
             logger.info("Joining receiving thread")
             self._receiving_thread.join()
-            # logger.info("Joining connection thread")
             self._server_socket.close()
-            # self._connection_thread.join()
         except Exception as e:
             logger.warning(f"An exception has occured: {e}")
         
@@ -129,21 +127,33 @@ class UE5Server:
     def __handle_new_message(self, address: any, message: Message):
         logger.info("")
         client = Client()
-        if not message.client_id in self._clients:
+        if msg_types["Register"] == message.message_type:
             client.id = message.client_id
             client.address = address
-            self._clients[message.client_id] = client
-            logger.info(f"Client {client.address} has been registered with id {client.id} successfully")
-            self.send_data(client.address, Message(0, msg_types["Register"], [Signal(1, 0x01)]))
-        else:
+            if not message.client_id in self._clients:
+                self._clients[message.client_id] = client
+                logger.info(
+                    f"Client {client.address} has been registered with id {client.id} successfully")
+            else:
+                logger.info(
+                    f"Client {client.address} with id {client.id} is already registered!")
+            self.send_data(
+                address=client.address,
+                message=Message(
+                    client_id=0,
+                    message_type=msg_types["Register"], 
+                    signals=[Signal(1, 0x01)]))
+        elif message.client_id in self._clients:
             client = self._clients[message.client_id]
             self.receiving_queue.put({client.id, message})
+        else:
+            logger.warning(
+                f"Client {client.address} with id {client.id} is unregistered!")
         
             
     @__lock_mutex
     def send_data(self, address, message: Message=None):
         logger.info("")
-        # Sends to the socket
         if (message is not None):
             data_bytes = message.serialize()
         else:
@@ -171,7 +181,6 @@ class UE5Server:
 
 
     def __connect_to_client(self, host = "127.0.0.1", port = 6969):
-        # Starts the client
         logger.info("Connecting to server...")
         server_address = host, port
         socket = st.socket(st.AF_INET, st.SOCK_DGRAM)

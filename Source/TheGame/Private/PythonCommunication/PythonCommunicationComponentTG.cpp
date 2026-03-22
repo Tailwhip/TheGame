@@ -6,14 +6,21 @@
 #include "Engine/World.h"
 #include "Networking.h"
 #include "Sockets.h"
+#include "Misc/ByteSwap.h"
 
 #include "TheGame/TheGame.h"
 
 
-uint8_t UPythonCommunicationComponentTG::CurrRegisterId{0};
+uint8_t UPythonCommunicationComponentTG::CurrRegisterId{ 0 };
 
 // Sets default values for this component's properties
-UPythonCommunicationComponentTG::UPythonCommunicationComponentTG()
+UPythonCommunicationComponentTG::UPythonCommunicationComponentTG() :
+	Super(),
+	ServerPort{ 7777 },
+	RegisterId { CurrRegisterId },
+	bShouldHandleData{ true },
+	bShouldSendData{ false },
+	bIsRegistered{ false }
 {
 	TRACE("");
 	CurrRegisterId++;
@@ -29,21 +36,6 @@ void UPythonCommunicationComponentTG::BeginPlay()
 {
 	TRACE("");
 	Super::BeginPlay();
-	// Py_Initialize();
-
-	// File opened
-	// FILE* fp = nullptr;
-	// fopen_s(fp, "Source/Python/ue_communication_server.py", "w");
-	// int result = PyRun_AnyFile(fp, "Source/Python/script.py");
-	// if(GEngine)
-	// {
-	// 	GEngine->AddOnScreenDebugMessage(-1, 50.0f, FColor::Yellow,
-	// 	FString::Printf(TEXT("result = %d"), result));
-	// } else
-	// {
-	// UE_LOG(LogTemp, Error, TEXT("PyRun_AnyFile result "));
-	// }
-	// StartServer();
 	ConnectToServer();
 }
 
@@ -69,28 +61,28 @@ void UPythonCommunicationComponentTG::OnReceivedDataChanged()
 	TRACE("");
 }
 
-// Both functions have to exist so they can be called from Unreal Engine
-// Called when Avatar starts signing. Pauses the processing of incoming data.
 void UPythonCommunicationComponentTG::PauseHandlingData()
 {
 	TRACE("");
 	bShouldHandleData = false;
 }
 
-// Called when Avatar ends signing. Resumes the processing of incoming data.
 void UPythonCommunicationComponentTG::ResumeHandlingData()
 {
 	TRACE("");
 	bShouldHandleData = true;
 }
 
-
-void UPythonCommunicationComponentTG::ConnectToServer()
+bool UPythonCommunicationComponentTG::ConnectToServer()
 {
-	TRACE("");
+	auto Owner = GetOwner();
+	if (Owner)
+		TRACE("%s is connecting to python server with reg id: %d", 
+			*GetOwner()->GetName(), RegisterId)
+	else
+		TRACE("Unknown owner is connecting to python server with reg id: %d", RegisterId)
 	// Sets up a TCP client connection with server on localhost:PORT.
 	FIPv4Endpoint ListenerEndpoint(FIPv4Address(127, 0, 0, 1), ServerPort);
-
 	// Listening for incoming connections
 	ClientSocket = FUdpSocketBuilder(TEXT("Python Client"))
 		.AsReusable(); // Can be used after being deleted (after the server is closed), without having to wait some time
@@ -100,167 +92,120 @@ void UPythonCommunicationComponentTG::ConnectToServer()
 	if (!ClientSocket->Connect(*ListenerEndpoint.ToInternetAddrIPV4()))
 	{
 		TRACEERROR("The connection to server has failed!");
-		return;
+		return false;
 	}
 	
-	// // Define a socket that will send a response back to Python when necessary 
-	// ClientSocket = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)
-	// 	->CreateSocket(NAME_Stream, TEXT("Send response to Python"), false);
-	//
-	
-	if (ClientSocket) // If ClientSocket was created successfully
+	if (ClientSocket)
 	{
-		// Initializes a timer to periodically handle incoming data from connected clients (Python script).
-		FTimerDelegate TimerDelegate;
-		TimerDelegate.BindLambda([this]() 
+		TimerDelegate.BindLambda(
+			[this]()
 			{
 				if (bIsRegistered)
 					HandleData();
 				else
 					HandleConnection();
 			});
-		
 		GetOwner()->GetWorldTimerManager().SetTimer(TickTimerHandle, TimerDelegate, 1.0f, true);
 	}
-
 	// Note: The server listens for incoming connections and uses a separate socket for sending responses to Python.
+	return true;
 }
 
 // Send a response back to Python on a specified port.
-void UPythonCommunicationComponentTG::SendMessage(DroneTrainerCommTG::Message& Message) 
+bool UPythonCommunicationComponentTG::SendMessage(
+	DroneTrainerCommTG::Message& Message) 
 {
-	TRACE("");
-	if (!ClientSocket) // If ClientSocket was created successfully
+	TRACE("%s (Reg Id: %d) is sending message", *GetOwner()->GetName(), RegisterId);
+	bool result = false;
+
+	if (!ClientSocket)
 	{
 		TRACEERROR("ClientSocket is invalid!");
-		return;
+		return result;
 	}
-	// Connects to the Python server using the ClientSocket.
-	// FIPv4Endpoint SendEndpoint(FIPv4Address(127, 0, 0, 1), ServerPort);
-	// if (ClientSocket->Connect(*SendEndpoint.ToInternetAddr()))
-	// {
+
 	// Sending the response data.
 	TTuple<DroneTrainerCommTG::PayloadLen,
 			const DroneTrainerCommTG::Byte*> MessageBuffer = Message.Serialize();
 	const uint8* Data = MessageBuffer.Value;
 	int32 PayloadLen = MessageBuffer.Key;
 	int32 BytesSent = 0;
-	TRACE("Data to be sent: ")
+
 	FString DataHex;
-	for (int32 i = 0; i < PayloadLen; i++)
+	for (int32 i = 0; i < PayloadLen; ++i)
 		DataHex.Append(FString::Printf(TEXT("0x%02x "), Data[i]));
 	TRACE("Data to be sent: (hex): %s", *DataHex)
-	ClientSocket->Send(Data, PayloadLen, BytesSent);
-	if (BytesSent == PayloadLen) TRACE("Data has been sent successfully");
-	// }
-	// else
-	// 	TRACEERROR("Could not connect to server with port: %d", ServerPort);
+	result = ClientSocket->Send(Data, PayloadLen, BytesSent);
+	if (BytesSent == PayloadLen)
+		TRACE("Data has been sent successfully")
+	else
+	{
+		TRACEERROR("BytesSent is not equal to Payload length!")
+		result = false;
+	}
+
+	return result;
 }
 
 // Handles the incoming data from connected clients (Python script)
-void UPythonCommunicationComponentTG::HandleData()
+bool UPythonCommunicationComponentTG::HandleData()
 {
-	TRACE("");
+	TRACE("")
+	bool result = false;
 	// Note: Data handling may be paused by Unreal Engine using bShouldHandleData flag.
-	if (!bShouldHandleData) // Data handling possibly paused by Unreal Engine
+	if (!bShouldHandleData)
 	{
 		TRACEWARN("UE System is currently busy");
-		return;
+		return result;
 	}
 
-	if (!ClientSocket) // If socket is not valid for any reason stop 
+	if (!ClientSocket)
 	{
 		TRACEERROR("Listener server stopped!");
-		return;
+		return result;
 	}
 
-	if (ClientSocket && ClientSocket->GetConnectionState() == SCS_Connected)
-	{
-		// Receives data from the active socket.
-		char Buffer[1024] = { 0 };
-		int32 BytesRead = 0;
-		if (!ClientSocket->Recv((uint8*)Buffer, sizeof(Buffer), BytesRead))
-		{
-			TRACEERROR("No data has been received!")
-			return;
-		}
-		// Converts the data to FString and triggers an event (inside of Unreal Engine)
-		ReceivedData = FString(FUTF8ToTCHAR(Buffer));
-		FString ReceivedDataHex;
-		
-		for (int32 i = 0; i < ReceivedData.Len(); i++)
-			ReceivedDataHex.Append(FString::Printf(TEXT("0x%02x "), Buffer[i]));
-		TRACE("Data received (hex): %s", *ReceivedDataHex)
-		TRACE("Data received: %s", *ReceivedData)
-		OnReceivedDataChanged();
-	}
+	DroneTrainerCommTG::Message msg =
+		DroneTrainerCommTG::Message(0, DroneTrainerCommTG::MsgType::None);
+	result = ReceiveMessage(msg);
+	return result;
 }
 
-void UPythonCommunicationComponentTG::HandleConnection()
+bool UPythonCommunicationComponentTG::HandleConnection()
 {
-	TRACE("");
-	// Note: Data handling may be paused by Unreal Engine using bShouldHandleData flag.
-	if (!bShouldHandleData) // Data handling possibly paused by Unreal Engine
+	TRACE("%s is connecting to the server", *GetOwner()->GetName(), RegisterId)
+	bool result = false;
+
+	if (!bShouldHandleData)
 	{
 		TRACEWARN("UE System is currently busy");
-		return;
+		return false;
 	}
 
-	if (!ClientSocket) // If socket is not valid for any reason stop 
+	DroneTrainerCommTG::Message registerMsg = DroneTrainerCommTG::Message(
+		RegisterId,
+		DroneTrainerCommTG::MsgType::Register);
+	SendMessage(registerMsg);
+
+	DroneTrainerCommTG::Message msg =
+		DroneTrainerCommTG::Message(0, DroneTrainerCommTG::MsgType::None);
+	if (ReceiveMessage(msg))
 	{
-		TRACEERROR("Listener server stopped!");
-		return;
-	}
-
-	DroneTrainerCommTG::Signal EmptySignal;
-	CurrentSignalsBuffer = TArray{std::move(EmptySignal)};
-	DroneTrainerCommTG::Message RegisterMsg =
-		DroneTrainerCommTG::Message(CurrRegisterId, DroneTrainerCommTG::MsgType::Register, CurrentSignalsBuffer);
-	SendMessage(RegisterMsg);
-
-	CurrentSignalsBuffer.Empty();
-	
-	if (ClientSocket && ClientSocket->GetConnectionState() == SCS_Connected)
-	{
-		// Receives data from the active socket.
-		char Buffer[MAX_DATA_SIZE] = { 0 };
-		int32 BytesRead = 0;
-		if (!ClientSocket->Recv((uint8*)Buffer, sizeof(Buffer), BytesRead))
+		//uint8 value = std::get<uint8>(msg.Data[0].Value);
+		uint8* valuePtr = msg.DataSignals[0].GetValue<uint8>();
+		if (!valuePtr)
 		{
-			TRACEERROR("No data has been received!")
-			return;
+			TRACEERROR("Received Value is empty!");
+			return false;
 		}
-		else
+		if (DroneTrainerCommTG::MsgType::Register == msg.MessageType && 1 == *valuePtr)
 		{
-			TRACE("Received %d bytes of data", BytesRead)
-		}
-		
-		// Converts the data to FString and triggers an event (inside of Unreal Engine)
-		FString ReceivedDataHex;
-		for (int32 i=0; i < BytesRead; i++)
-			ReceivedDataHex.Append(FString::Printf(TEXT("0x%02x "), Buffer[i]));
-
-		TRACE("Data received (hex): %s", *ReceivedDataHex)
-		TArray<DroneTrainerCommTG::Signal> data;
-		DroneTrainerCommTG::Message msg =
-			DroneTrainerCommTG::Message(0, DroneTrainerCommTG::MsgType::None, data);
-		msg.Deserialize((uint8*)Buffer);
-		if (!msg.Data.IsEmpty())
-		{
-			uint8 value = std::get<uint8>(msg.Data[0].Value);
-			TRACE("received Message: Reg Id %d; Msg Type: %d; Value: %d",
-				msg.RegisterId, static_cast<int>(msg.MessageType), value);
-			if (DroneTrainerCommTG::MsgType::Register == msg.MessageType && 1 == value)
-			{
-				bIsRegistered = true;
-				TRACE("Client registered successfully!")
-			}
-		}
-		else
-		{
-			TRACE("Received Message Data is empty!")
+			bIsRegistered = true;
+			TRACE("Client %s (regId: %d) registered successfully!", *GetOwner()->GetName(), RegisterId)
+			result = true;
 		}
 	}
+	return result;
 }
 
 // Closes the server socket and cleans up associated resources.
@@ -283,4 +228,70 @@ void UPythonCommunicationComponentTG::EndConnection()
 	// 	ReceivingSocket = nullptr;
 	// 	UE_LOG(LogTemp, Log, TEXT("Receiving socket ended"));
 	// }
+}
+
+bool UPythonCommunicationComponentTG::ReceiveMessage(
+	DroneTrainerCommTG::Message& MessageContainer)
+{
+	bool result = false;
+	if (!ClientSocket)
+	{
+		TRACEERROR("Listener server stopped!");
+		return false;
+	}
+
+	if (ClientSocket->GetConnectionState() == SCS_Connected)
+	{
+		uint32 pendingSize = 0;
+		if (!ClientSocket->HasPendingData(pendingSize))
+		{
+			TRACEERROR("No pending messages found!")
+			return false;
+		}
+		TRACE("%d bytes of payload waits to be read", pendingSize)
+
+		int32 bytesRead = 0;
+		TArray<uint8> payload;
+		payload.SetNumUninitialized(pendingSize);
+
+		TSharedRef<FInternetAddr> sender =
+			ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
+
+		if (!ClientSocket->RecvFrom(
+			payload.GetData(),
+			payload.Num(),
+			bytesRead,
+			*sender
+		))
+		{
+			TRACEERROR("No data has been received!")
+			return false;
+		}
+		else
+		{
+			TRACE("%d bytes of data have been read", bytesRead)
+		}
+
+		FString receivedDataHex;
+		// Converts the data to FString and triggers an event (inside of Unreal Engine)
+		for (auto ch : payload)
+		{
+			receivedDataHex.Append(FString::Printf(TEXT("0x%02x "), ch));
+		}
+		TRACE("Data received (hex): %s", *receivedDataHex)
+
+		MessageContainer.Deserialize(payload.GetData());
+		if (MessageContainer.DataSignals.IsEmpty())
+		{
+			TRACE("Received Message Data is empty!")
+			return false;
+		}
+		result = true;
+	}
+	else
+	{
+		TRACEERROR("Client socket is not connected!");
+		return false;
+	}
+	return result;
 }

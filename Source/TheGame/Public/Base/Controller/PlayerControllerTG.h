@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
+#include "Base/Controller/ControllerTG.h"
 #include "PlayerControllerTG.generated.h"
 
 
@@ -13,12 +14,13 @@
 class UEnhancedInputComponent;
 class UInputAction;
 class UInputMappingContext;
-class ACharacterTG;
 /**
  * 
  */
 UCLASS(Abstract)
-class THEGAME_API APlayerControllerTG : public APlayerController
+class THEGAME_API APlayerControllerTG :
+	public APlayerController,
+	public FControllerTG
 {
 	GENERATED_BODY()
 
@@ -55,24 +57,14 @@ public:
 	TObjectPtr<UInputMappingContext> InputMappingContext{nullptr};
 
 protected:
-	virtual void OnPossess(APawn* aPawn) override;
-	virtual void OnUnPossess() override;
-	virtual void ProcessPlayerInput(const float DeltaTime, const bool bGamePaused) override;
-	virtual void SetupInputComponent() override;
+	void OnPossess(APawn* aPawn) override;
+	void OnUnPossess() override;
+	void ProcessPlayerInput(const float DeltaTime, const bool bGamePaused) override;
+	void SetupInputComponent() override;
 	
-	void HandleMove(const FInputActionValue& InputActionValue);
-	void HandleLook(const FInputActionValue& InputActionValue);
-	void HandleJump();
-	void HandleCrouch();
-	void HandleAscend(const FInputActionValue& InputActionValue);
-	void HandleDescend(const FInputActionValue& InputActionValue);
-	void HandleShooting();
+	void HandleLook(const FInputActionValue& InputActionValue) override;
 
 	// Used to store a reference to the InputComponent cast to an EnhancedInputComponent.
 	UPROPERTY()
 	TObjectPtr<UEnhancedInputComponent> EnhancedInputComponent{nullptr};
-
-	// Used to store a reference to the pawn we are controlling.
-	UPROPERTY()
-	TObjectPtr<class ACharacterTG> PlayerCharacter{nullptr};
 };

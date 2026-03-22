@@ -21,9 +21,11 @@ public class TheGame : ModuleRules
 		
 		PublicIncludePaths.AddRange(new string[]
 		{
+			// TODO: Make dirs independent
 			"C:/Users/Taail/AppData/Local/Programs/Python/Python312/include",
             "C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Actors",
             "C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Base",
+			"C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Base/Controller",
             "C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Pooling",
 			"C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/PythonCommunication",
             "C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Tools"
