@@ -4,8 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "Containers/Queue.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+
+#include "PythonCommunication/MessageTG.h"
 #include "MessageDispatcherTG.generated.h"
 
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDroneMovementReceived, const FInputActionValue&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDroneLookReceived, const FInputActionValue&);
 /**
  * 
  */
@@ -13,5 +21,20 @@ UCLASS()
 class THEGAME_API UMessageDispatcherTG : public UObject
 {
 	GENERATED_BODY()
-	
+
+public:
+	UMessageDispatcherTG();
+	~UMessageDispatcherTG();
+
+	// Delegate
+	FOnDroneMovementReceived OnDroneMovementReceived;
+	FOnDroneLookReceived OnDroneLookReceived;
+
+	void AddReceivedMessage(FMessageTG&& ReceivedMsg);
+	void AddMessageToSend(FMessageTG&& ToSendMsg);
+
+	void ProcessMessagesReceived();
+private:
+	TQueue<FMessageTG> MessagesReceived;
+	TQueue<FMessageTG> MessagesToSend;
 };

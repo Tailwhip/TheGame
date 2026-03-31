@@ -19,7 +19,7 @@ void APlayerControllerTG::OnPossess(APawn* aPawn)
     // Store a reference to the Player's Pawn
     ControlledCharacter = Cast<ACharacterTG>(aPawn);
     checkf(ControlledCharacter,
-        TEXT("APlayerControllerTG derived classes should only posses ACharacterTGBase derived pawns"));
+        TEXT("APlayerControllerTG derived classes should only posses ACharacterTG derived pawns"));
     
     // Get a reference to the EnhancedInputComponent.
     EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
@@ -29,7 +29,8 @@ void APlayerControllerTG::OnPossess(APawn* aPawn)
     // Get the local player subsystem
     UEnhancedInputLocalPlayerSubsystem* InputSubsystem =
         ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-    checkf(InputSubsystem, TEXT("Unable to get references to the EnhancedInputLocalSubsystem."));
+    checkf(InputSubsystem, 
+        TEXT("Unable to get references to the EnhancedInputLocalSubsystem."));
 
     // Wipe existing mappings, and add our mapping.
     checkf(InputMappingContext, TEXT("InputMappingContext was not specified."));
@@ -102,42 +103,4 @@ void APlayerControllerTG::OnUnPossess()
 
     // Call the parent class method
     Super::OnUnPossess();
-}
-
-void APlayerControllerTG::ProcessPlayerInput(const float DeltaTime, const bool bGamePaused)
-{
-    Super::ProcessPlayerInput(DeltaTime, bGamePaused);
-
-    if (bGamePaused) return;
-    //
-    // if (IsInputKeyDown(EKeys::RightMouseButton) || IsInputKeyDown(EKeys::LeftMouseButton))
-    // {
-    //     int a = 0;
-    // }
-    // if (WasInputKeyJustPressed(EKeys::LeftMouseButton))
-    // {
-    //     int a = 0;
-    // }
-    // if (WasInputKeyJustPressed(EKeys::RightMouseButton))
-    // {
-    //     int a = 0;
-    // }
-    // if (WasInputKeyJustPressed(EKeys::MiddleMouseButton))
-    // {
-    //     int a = 0;
-    // }
-    // if (WasInputKeyJustPressed(EKeys::ThumbMouseButton))
-    // {
-    //     int a = 0;
-    // }
-    // if (WasInputKeyJustPressed(EKeys::ThumbMouseButton2))
-    // {
-    //     int a = 0;
-    // }
-}
-
-void APlayerControllerTG::SetupInputComponent()
-{
-    Super::SetupInputComponent();
-
 }

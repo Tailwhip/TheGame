@@ -127,7 +127,7 @@ class UE5Server:
     def __handle_new_message(self, address: any, message: Message):
         logger.info("")
         client = Client()
-        if msg_types["Register"] == message.message_type:
+        if msg_type["Register"] == message.message_type:
             client.id = message.client_id
             client.address = address
             if not message.client_id in self._clients:
@@ -141,8 +141,8 @@ class UE5Server:
                 address=client.address,
                 message=Message(
                     client_id=0,
-                    message_type=msg_types["Register"], 
-                    signals=[Signal(1, 0x01)]))
+                    message_type=msg_type["Register"],
+                    signal=Signal(1, 0, 0x01)))
         elif message.client_id in self._clients:
             client = self._clients[message.client_id]
             self.receiving_queue.put({client.id, message})

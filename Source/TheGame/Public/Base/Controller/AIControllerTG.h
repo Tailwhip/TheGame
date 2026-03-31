@@ -17,7 +17,17 @@ class THEGAME_API AAIControllerTG :
 {
 	GENERATED_BODY()
 
+public:
+	AAIControllerTG();
+	~AAIControllerTG();
+
 protected:
 	void HandleLook(const FInputActionValue& InputActionValue) override;
-	
+	virtual void BeginPlay() override;
+	virtual void OnPossess(APawn* aPawn) override;
+	virtual void OnUnPossess() override;
+
+private:
+	UPROPERTY()
+	class UMessageDispatcherTG* MessageDispacher;
 };

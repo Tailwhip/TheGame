@@ -59,9 +59,7 @@ public:
 protected:
 	void OnPossess(APawn* aPawn) override;
 	void OnUnPossess() override;
-	void ProcessPlayerInput(const float DeltaTime, const bool bGamePaused) override;
-	void SetupInputComponent() override;
-	
+
 	void HandleLook(const FInputActionValue& InputActionValue) override;
 
 	// Used to store a reference to the InputComponent cast to an EnhancedInputComponent.

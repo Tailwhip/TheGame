@@ -13,12 +13,11 @@
 #include "Base/Controller/AIControllerTG.h"
 #include "Base/Controller/PlayerControllerTG.h"
 #include "Pooling/ActorsSpawnerComponentTG.h"
+#include "PythonCommunication/MessageDispatcherTG.h"
 #include "PythonCommunication/PythonCommunicationComponentTG.h"
 #include "UI/CharacterHUDWidgetTG.h"
 
-// #include "UniversalObjectLocators/UniversalObjectLocatorUtils.h"
 
-// Sets default values
 ACharacterTG::ACharacterTG():
 	Super(),
 	TraceDistance{ 100000.f },
@@ -27,8 +26,10 @@ ACharacterTG::ACharacterTG():
 	bIsDestroyable{ true },
 	bIsAI{ false }
 {
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame. 
+	// You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
 
 	TRACE("Setting up a camera...")
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -43,7 +44,8 @@ ACharacterTG::ACharacterTG():
 	Camera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	Camera->bUsePawnControlRotation = true; // Enables moves up and down with camera
 		
-	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("ProjectileSpawnPoint"));
+	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(
+		TEXT("ProjectileSpawnPoint"));
 	ProjectileSpawnPoint->AttachToComponent(RootComponent.Get(),
 		FAttachmentTransformRules::KeepRelativeTransform);
 	ProjectileSpawnPoint->SetRelativeLocation(FVector(300.f, 0.f,0.f));
@@ -126,7 +128,7 @@ void ACharacterTG::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ACharacterTG::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+
 }
 
 void ACharacterTG::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

@@ -57,3 +57,11 @@ DECLARE_LOG_CATEGORY_EXTERN(LogTheGame, All, All);
     const FString Msg = FString::Printf(TEXT(Format), ##__VA_ARGS__); \
     GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::BLUE, Msg); \
 }
+
+#define TRACEBYTES(Bytes, Len) \
+{ \
+    FString dataHex; \
+    for (int32 i = 0; i < Len; ++i) \
+        dataHex.Append(FString::Printf(TEXT("0x%02x "), Bytes[i])); \
+	TRACE("%s", *dataHex) \
+}

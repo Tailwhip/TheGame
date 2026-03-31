@@ -43,7 +43,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	class USpringArmComponent* CameraBoom;
-	
 protected:
 	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CharacterTG")
 	//class UInputMappingContext* DefaultMappingContext;

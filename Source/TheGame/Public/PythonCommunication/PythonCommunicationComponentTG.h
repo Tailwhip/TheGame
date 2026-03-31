@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "DroneTrainerCommunicationTG.h"
+#include "PythonCommunication/MessageTG.h"
 #include "PythonCommunicationComponentTG.generated.h"
 
 
@@ -16,6 +16,7 @@ class THEGAME_API UPythonCommunicationComponentTG : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	UPythonCommunicationComponentTG();
+	~UPythonCommunicationComponentTG();
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 		FActorComponentTickFunction* ThisTickFunction) override;
@@ -34,28 +35,31 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "PythonCommunicationComponentTG")
 	int32 ServerPort;
+
+	UPROPERTY()
+	class UMessageDispatcherTG* MessageDispacher;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 private:
-	bool HandleData();
-	bool HandleConnection();
-	bool SendMessage(DroneTrainerCommTG::Message& Message);
+	bool HandleData(FMessageTG&& Message);
+	bool HandleConnection(FMessageTG&& Message);
+	bool SendMessage(FMessageTG& Message);
 	bool ConnectToServer();
 	void EndConnection();
-	bool ReceiveMessage(DroneTrainerCommTG::Message& MessageContainer);
+	bool ReceiveMessage();
 
 	FSocket* ClientSocket;
 	// FSocket* ReceivingSocket;
 	// Initializes a timer to periodically handle incoming data from connected clients (Python script).
 	FTimerDelegate TimerDelegate;
 	FTimerHandle TickTimerHandle;
-	TArray<DroneTrainerCommTG::Signal> CurrentSignalsBuffer;
-	
-	static DroneTrainerCommTG::RegId CurrRegisterId;
-	DroneTrainerCommTG::RegId RegisterId;
+	TArray<FSignalTG> CurrentSignalsBuffer;
+	static RegId CurrRegisterId;
+	RegId RegisterId;
+	// Note: Data handling may be paused by Unreal Engine using bShouldHandleData flag.
 	bool bShouldHandleData;
 	bool bShouldSendData;
 	bool bIsRegistered;

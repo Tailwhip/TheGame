@@ -23,6 +23,7 @@ FControllerTG::~FControllerTG()
 
 void FControllerTG::HandleMove(const FInputActionValue& InputActionValue)
 {
+    TRACE("")
     // Input is a Vector2D
     // const FVector2D MovementVector = InputActionValue.Get<FVector2D>();
     const FVector MovementVector = InputActionValue.Get<FVector>();
@@ -109,7 +110,7 @@ void FControllerTG::HandleShooting()
     if (ControlledCharacter)
     {
         TRACE("Shooting projectile...")
-            ControlledCharacter->ShootProjectile();
+        ControlledCharacter->ShootProjectile();
     }
     else
     {
