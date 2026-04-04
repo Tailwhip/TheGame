@@ -27,12 +27,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "ActorTG")
 	float TimeToLive;
 
+	UPROPERTY(EditDefaultsOnly, Category = "ActorTG")
+	bool bInUse;
+
+	UPROPERTY(EditDefaultsOnly, Category = "ActorTG")
+	float TimeToLiveCounter;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	
-private:
-	bool bInUse;
-	float TimeToLiveCounter;
-
 };

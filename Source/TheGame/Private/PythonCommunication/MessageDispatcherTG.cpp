@@ -79,3 +79,54 @@ void UMessageDispatcherTG::ProcessMessagesReceived()
 		}
 	}
 }
+
+bool UMessageDispatcherTG::GetMessageToSend(FMessageTG& OutMessage)
+{
+	TRACE("");
+	return MessagesToSend.Dequeue(OutMessage);
+}
+
+void UMessageDispatcherTG::ComposeSnapshotMessage(
+	RegId RegisterId,
+	FVector& Location,
+	FRotator& Rotation,
+	bool bDidDamage,
+	bool bDidKill,
+	bool bWasHit,
+	bool bWasKilled)
+{
+	TRACE("");
+	FMessageTG message;
+
+	Payload payload;
+	float x = Location.X;
+	payload.Append(ToBytes(x), sizeof(float));
+	float y = Location.Y;
+	payload.Append(ToBytes(y), sizeof(float));
+	float z = Location.Z;
+	payload.Append(ToBytes(z), sizeof(float));
+
+	float pitch = Rotation.Pitch;
+	payload.Append(ToBytes(pitch), sizeof(float));
+	float yaw = Rotation.Yaw;
+	payload.Append(ToBytes(yaw), sizeof(float));
+	float roll = Rotation.Roll;
+	payload.Append(ToBytes(roll), sizeof(float));
+
+	payload.Append(ToBytes(bDidDamage), sizeof(bool));
+	payload.Append(ToBytes(bDidKill), sizeof(bool));
+	payload.Append(ToBytes(bWasHit), sizeof(bool));
+	payload.Append(ToBytes(bWasKilled), sizeof(bool));
+
+	message.RegisterId = RegisterId;
+	message.Type = MsgType::Snapshot;
+	FSignalTG signal;
+	signal.Type = SignalValueType::PAYLOAD;
+	signal.PayloadLayout = PayloadLayoutType::DroneInfo;
+	signal.SetValue<Payload>(payload);
+	message.DataSignal = signal;
+
+	AddMessageToSend(MoveTemp(message));
+}
+
+

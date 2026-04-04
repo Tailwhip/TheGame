@@ -50,7 +50,8 @@ enum class SignalValueType : uint8
 enum class PayloadLayoutType : uint8
 {
 	None = 0,
-	DroneContoller
+	DroneContoller,
+	DroneInfo
 };
 
 template<typename T>
@@ -114,26 +115,4 @@ struct THEGAME_API FSignalTG
 	}
 	bool Serialize(Payload& OutBuffer);
 	size_t Deserialize(Payload& data, size_t startPos = 0);
-
-	std::map<SignalValueType, uint8> SignalValueTypeSizes =
-	{
-		{SignalValueType::UINT8, 1},
-		{SignalValueType::UINT16, 2},
-		{SignalValueType::UINT32, 4},
-		{SignalValueType::UINT64, 8},
-		{SignalValueType::FLOAT, 4}, // TODO: Confirm the size
-		{SignalValueType::DOUBLE, 8} // TODO: Confirm the size
-	};
-
-	std::map<uint8, TArray<SignalValueType>> PayloadLayouts =
-	{
-		{ 0, {} },
-		{ 1, {
-			SignalValueType::FLOAT,
-			SignalValueType::FLOAT,
-			SignalValueType::FLOAT,
-			SignalValueType::FLOAT,
-			SignalValueType::FLOAT,
-			SignalValueType::FLOAT} }
-	};
 };

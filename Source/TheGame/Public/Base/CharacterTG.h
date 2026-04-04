@@ -28,6 +28,8 @@ public:
 	void OnHealthChanged(float NewHealth);
 	//void OnAmmoChanged(int32 Ammo);
 	void OnDeath();
+	void OnHit(AActor* OtherActor); // The opponent
+	void OnKill(); // The opponent
 
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	class USceneComponent* ProjectileSpawnPoint;
@@ -43,15 +45,15 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	class USpringArmComponent* CameraBoom;
-protected:
+
 	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "CharacterTG")
 	//class UInputMappingContext* DefaultMappingContext;
 
-	UPROPERTY()
-	class APlayerControllerTG* PlayerController;
+	//UPROPERTY()
+	//class APlayerControllerTG* PlayerController;
 
-	UPROPERTY()
-	class AAIControllerTG* AIController;
+	//UPROPERTY()
+	//class AAIControllerTG* AIController;
 
 	UPROPERTY(EditDefaultsOnly, Category = "CharacterTG")
 	TSubclassOf<class UCharacterHUDWidgetTG> HUDClass{nullptr};
@@ -74,8 +76,20 @@ protected:
 	UPROPERTY(EditInstanceOnly, Category = "CharacterTG")
 	bool bIsAI;
 
-	ACharacterTG* ThisCharacter{nullptr};
+	UPROPERTY(BlueprintReadOnly, Category = "CharacterTG")
+	bool bDidDamage;
 
+	UPROPERTY(BlueprintReadOnly, Category = "CharacterTG")
+	bool bDidKill;
+
+	UPROPERTY(BlueprintReadOnly, Category = "CharacterTG")
+	bool bWasHit;
+
+	UPROPERTY(BlueprintReadOnly, Category = "CharacterTG")
+	bool bWasKilled;
+
+protected:
+	ACharacterTG* ThisCharacter{nullptr};
 	UFUNCTION()
 	void BeginOverlap(
 		UPrimitiveComponent* OverlappedComponent,
@@ -87,8 +101,8 @@ protected:
 
 	virtual float TakeDamage(
 		float DamageAmount,
-		struct FDamageEvent const& DamageEvent,
-		class AController* EventInstigator,
+		FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
 		AActor* DamageCauser) override;
 private:
 	float MaxHealth;

@@ -17,7 +17,7 @@ class UInputMappingContext;
 /**
  * 
  */
-UCLASS(Abstract)
+UCLASS(BlueprintType, Blueprintable, meta = (BlueprintSpawnableComponent))
 class THEGAME_API APlayerControllerTG :
 	public APlayerController,
 	public FControllerTG

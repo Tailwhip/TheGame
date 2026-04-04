@@ -14,14 +14,36 @@
 
 uint8_t UPythonCommunicationComponentTG::CurrRegisterId{ 0 };
 
+TMap<SignalValueType, uint8> UPythonCommunicationComponentTG::SignalValueTypeSizes =
+{
+	{ SignalValueType::UINT8, 1 },
+	{ SignalValueType::UINT16, 2 },
+	{ SignalValueType::UINT32, 4 },
+	{ SignalValueType::UINT64, 8 },
+	{ SignalValueType::FLOAT, 4 }, // TODO: Confirm the size
+	{ SignalValueType::DOUBLE, 8 } // TODO: Confirm the size
+};
+
+TMap<uint8, TArray<SignalValueType>> UPythonCommunicationComponentTG::PayloadLayouts =
+{
+	{ 0, {} },
+	{ 1, {
+		SignalValueType::FLOAT,
+		SignalValueType::FLOAT,
+		SignalValueType::FLOAT,
+		SignalValueType::FLOAT,
+		SignalValueType::FLOAT,
+		SignalValueType::FLOAT} }
+};
+
 // Sets default values for this component's properties
 UPythonCommunicationComponentTG::UPythonCommunicationComponentTG() :
 	Super(),
 	ServerPort{ 7777 },
+	bIsRegistered{ false },
 	RegisterId{ CurrRegisterId },
 	bShouldHandleData{ true },
-	bShouldSendData{ false },
-	bIsRegistered{ false }
+	bShouldSendData{ false }
 {
 	TRACE("");
 	CurrRegisterId++;
@@ -80,6 +102,13 @@ void UPythonCommunicationComponentTG::ResumeHandlingData()
 	bShouldHandleData = true;
 }
 
+bool UPythonCommunicationComponentTG::IsConnected()
+{
+	if (!ClientSocket) return false;
+	if (ClientSocket->GetConnectionState() != SCS_Connected) return false;
+	return true;
+}
+
 bool UPythonCommunicationComponentTG::ConnectToServer()
 {
 	auto Owner = GetOwner();
@@ -87,7 +116,8 @@ bool UPythonCommunicationComponentTG::ConnectToServer()
 		TRACE("%s is connecting to python server with reg id: %d", 
 			*GetOwner()->GetName(), RegisterId)
 	else
-		TRACE("Unknown owner is connecting to python server with reg id: %d", RegisterId)
+		TRACE("Unknown owner is connecting to python server with reg id: %d", 
+			RegisterId)
 	// Sets up a TCP client connection with server on localhost:PORT.
 	FIPv4Endpoint ListenerEndpoint(FIPv4Address(127, 0, 0, 1), ServerPort);
 	// Listening for incoming connections
@@ -95,7 +125,6 @@ bool UPythonCommunicationComponentTG::ConnectToServer()
 		.AsReusable(); // Can be used after being deleted (after the server is closed), without having to wait some time
 	// .BoundToEndpoint(ListenerEndpoint) // Binds it to the Endpoint
 	// .Listening(8); // Max number of pending connections
-	
 	if (!ClientSocket->Connect(*ListenerEndpoint.ToInternetAddrIPV4()))
 	{
 		TRACEERROR("The connection to server has failed!");
@@ -104,18 +133,30 @@ bool UPythonCommunicationComponentTG::ConnectToServer()
 	
 	if (ClientSocket)
 	{
-		TimerDelegate.BindLambda(
-			[this]()
+		TimerDelegate.BindLambda([this]()
+		{
+			if (!bIsRegistered)
 			{
-				if (!bIsRegistered) 
+				TRACE("%s is trying to register with id: %d", *GetOwner()->GetName(), RegisterId)
+				FMessageTG registerMsg = FMessageTG(RegisterId, MsgType::Register);
+				SendMessage(registerMsg);
+			}
+			else
+			{
+				FMessageTG msgToSend;
+				while (MessageDispacher->GetMessageToSend(msgToSend))
 				{
-					TRACE("%s is trying to register with id: %d", *GetOwner()->GetName(), RegisterId)
-					FMessageTG registerMsg = FMessageTG(RegisterId, MsgType::Register);
-					SendMessage(registerMsg);
+					TRACE("%s is sending new snapshot with id: %d", 
+						*GetOwner()->GetName(), RegisterId)
+					SendMessage(msgToSend);
 				}
-				ReceiveMessage();
-				if (MessageDispacher) MessageDispacher->ProcessMessagesReceived(); //TODO: Move to TickComponent
-			});
+			}
+			ReceiveMessage();
+			if (MessageDispacher)
+			{
+				MessageDispacher->ProcessMessagesReceived(); //TODO: Move to TickComponent
+			}
+		});
 		GetOwner()->GetWorldTimerManager().SetTimer(TickTimerHandle, TimerDelegate, 1.0f, true);
 	}
 	// Note: The server listens for incoming connections and uses a separate socket for sending responses to Python.
@@ -135,14 +176,11 @@ bool UPythonCommunicationComponentTG::SendMessage(FMessageTG& Message)
 	}
 
 	Payload messageBuffer;
-	/*TTuple<PayloadLen, const Byte*> messageBuffer;*/
 	if (!Message.Serialize(messageBuffer))
 	{
 		TRACEERROR("Failed to serialize data!");
 		return result;
 	}
-	//int32 payloadLen = messageBuffer.Key;
-	//const uint8* data = messageBuffer.Value;
 	int32 payloadLen = messageBuffer.Num();
 	int32 bytesSent = 0;
 
@@ -182,6 +220,14 @@ bool UPythonCommunicationComponentTG::HandleData(FMessageTG&& Message)
 		return false;
 	}
 
+	uint8* valuePtr = Message.DataSignal.GetValue<uint8>();
+	if (MsgType::Unregister == Message.Type && valuePtr && 1 == *valuePtr)
+	{
+		bIsRegistered = false;
+		TRACE("Client %s (regId: %d) unregistered successfully!", 
+			*GetOwner()->GetName(), RegisterId)
+	}
+
 	TRACE("Received new message")
 	MessageDispacher->AddReceivedMessage(MoveTemp(Message));
 	return true;
@@ -189,7 +235,8 @@ bool UPythonCommunicationComponentTG::HandleData(FMessageTG&& Message)
 
 bool UPythonCommunicationComponentTG::HandleConnection(FMessageTG&& Message)
 {
-	TRACE("%s is connecting to the server with id: %d", *GetOwner()->GetName(), RegisterId)
+	TRACE("%s is connecting to the server with id: %d", 
+		*GetOwner()->GetName(), RegisterId)
 	bool result = false;
 
 	if (!bShouldHandleData)
@@ -202,7 +249,8 @@ bool UPythonCommunicationComponentTG::HandleConnection(FMessageTG&& Message)
 	if (MsgType::Register == Message.Type && valuePtr && 1 == *valuePtr)
 	{
 		bIsRegistered = true;
-		TRACE("Client %s (regId: %d) registered successfully!", *GetOwner()->GetName(), RegisterId)
+		TRACE("Client %s (regId: %d) registered successfully!", 
+			*GetOwner()->GetName(), RegisterId)
 		result = true;
 	}
 	else
@@ -241,7 +289,7 @@ bool UPythonCommunicationComponentTG::ReceiveMessage()
 	bool result = false;
 	if (!ClientSocket)
 	{
-		TRACEERROR("Listener server stopped!");
+		TRACEERROR("Listener server not connected!");
 		return false;
 	}
 
@@ -292,10 +340,17 @@ bool UPythonCommunicationComponentTG::ReceiveMessage()
 			}
 			if (bIsRegistered)
 			{
-				if (!HandleData(std::move(msg))) TRACE("Failed to handle data");
+				if (!HandleData(std::move(msg)))
+				{
+					TRACE("Failed to handle data");
+					return false;
+				}
 			}
-			else
-				if (!HandleConnection(std::move(msg))) TRACE("Failed to connect");
+			else if (!HandleConnection(std::move(msg)))
+			{
+				TRACE("Failed to connect");
+				return false;
+			}
 			result = true;
 		}
 	}

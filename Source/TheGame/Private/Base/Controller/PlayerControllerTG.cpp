@@ -88,8 +88,8 @@ void APlayerControllerTG::OnPossess(APawn* aPawn)
 
 void APlayerControllerTG::HandleLook(const FInputActionValue& InputActionValue)
 {
-    // Input is a Vector2D
     const FVector2D LookAxisVector = InputActionValue.Get<FVector2D>();
+    //TRACE("Look X: %f / Y: %f", LookAxisVector.X, LookAxisVector.Y);
 
     // Add yaw and pitch input to controller
     AddYawInput(LookAxisVector.X * Sensitivity);

@@ -15,11 +15,14 @@ from ..logger import logger
 from ..signal_handler import *
 
 
+MAX_DATA_SIZE = 1024
+STEP_TIME_S = 1
+
 msg_type = {
     "None"       : 0,
 	"Register"   : 1,   # [Id] [MsgType=1] [ValueType=1] [PayloadLayout=0] [SignalValue=1]...
 	"Snapshot"   : 2,   # [Id] [MsgType]   [ValueType]   [PayloadLayout]   [SignalValue1]...
-	"Unregister" : 3,   # [Id] [MsgType]   [ValueType]   [PayloadLayout]   [SignalValue1]...
+	"Unregister" : 3,   # [Id] [MsgType=3] [ValueType=1] [PayloadLayout]   [SignalValue1=1]...
     "Command"    : 4    # [Id] [MsgType]   [ValueType]   [PayloadLayout]   [SignalValue1]...
 }
 
@@ -46,9 +49,21 @@ type_format = {
     8 : "?"
 }
 
+# TODO: Maybe would be nice to move it to some common configuration file
 payload_layout = {
     0 : [], # Use when the ValueType is not a payload
-    1 : ["FLOAT", "FLOAT", "FLOAT", "FLOAT", "FLOAT", "FLOAT"]
+    1 : [   # Command layout: DroneContoller
+        "FLOAT", "FLOAT",   # Movement
+        "FLOAT", "FLOAT"    # Look
+    ],
+    2 : [   # Snapshot layout: DroneInfo
+        "FLOAT", "FLOAT", "FLOAT",  # Position
+        "FLOAT", "FLOAT", "FLOAT",  # Rotation
+        "BOOL", # Did damage
+        "BOOL", # Did kill
+        "BOOL", # Was hit
+        "BOOL", # Was killed
+    ],
 }
 
 @dataclass()
@@ -75,15 +90,21 @@ class Signal:
         current_pos += 1
         self.payload_layout_index = payload[current_pos]
         current_pos += 1
-        logger.info(
-            f"Derialized Signal type: {self.type} / payload_layout: {self.payload_layout_index}")
+        logger.debug(
+            f"Derialized Signal type: {self.type} /"
+            f" payload_layout: {self.payload_layout_index} /"
+            f" current position: {current_pos} /"
+            f" payload: {payload}")
         if self.type == 0:
             logger.error(f"Type is None!")
             return
         if not self.type in type_format.keys():
             logger.error(f"Unknown Type: {self.type}!")
             return
-        self.value = struct.unpack(type_format[self.type], payload[current_pos:])
+        if self.type == 7:
+            self.value = payload[current_pos:]
+        else:
+            self.value = struct.unpack(type_format[self.type], payload[current_pos:])
 
 @dataclass()
 class Message:
@@ -95,14 +116,14 @@ class Message:
         return self.client_id
         
     def serialize(self):
-        logger.info("Serializing...")
+        logger.debug("Serializing...")
         data = self.client_id.to_bytes(1, "big")
         data += self.message_type.to_bytes(1, "big")
         data += self.signal.serialize()
         return data
     
     def deserialize(self, payload: bytes, start_pos: int = 0):
-        logger.info(f"Deserializing payload: {payload}")
+        logger.debug(f"Deserializing payload: {payload}")
         current_pos = start_pos
         if len(payload) < 5:
             logger.error(f"Received message is too short!")

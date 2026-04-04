@@ -14,11 +14,16 @@ class THEGAME_API UPythonCommunicationComponentTG : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	static TMap<SignalValueType, uint8> SignalValueTypeSizes;
+	static TMap<uint8, TArray<SignalValueType>> PayloadLayouts;
+
 	// Sets default values for this component's properties
 	UPythonCommunicationComponentTG();
 	~UPythonCommunicationComponentTG();
 	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
+	virtual void TickComponent(
+		float DeltaTime,
+		ELevelTick TickType,
 		FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(BlueprintReadWrite, Category = "PythonCommunicationComponentTG")
@@ -33,11 +38,19 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "PythonCommunicationComponentTG")
 	void ResumeHandlingData();
 
+	UFUNCTION(BlueprintCallable, Category = "PythonCommunicationComponentTG")
+	bool IsConnected();
+
 	UPROPERTY(EditAnywhere, Category = "PythonCommunicationComponentTG")
 	int32 ServerPort;
 
 	UPROPERTY()
 	class UMessageDispatcherTG* MessageDispacher;
+	
+	UPROPERTY()
+	bool bIsRegistered;
+
+	RegId RegisterId;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -58,9 +71,7 @@ private:
 	FTimerHandle TickTimerHandle;
 	TArray<FSignalTG> CurrentSignalsBuffer;
 	static RegId CurrRegisterId;
-	RegId RegisterId;
 	// Note: Data handling may be paused by Unreal Engine using bShouldHandleData flag.
 	bool bShouldHandleData;
 	bool bShouldSendData;
-	bool bIsRegistered;
 };

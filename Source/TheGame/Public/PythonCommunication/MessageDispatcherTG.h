@@ -12,8 +12,10 @@
 #include "MessageDispatcherTG.generated.h"
 
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnDroneMovementReceived, const FInputActionValue&);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnDroneLookReceived, const FInputActionValue&);
+DECLARE_MULTICAST_DELEGATE_OneParam(
+	FOnDroneMovementReceived, const FInputActionValue&);
+DECLARE_MULTICAST_DELEGATE_OneParam(
+	FOnDroneLookReceived, const FInputActionValue&);
 /**
  * 
  */
@@ -26,14 +28,25 @@ public:
 	UMessageDispatcherTG();
 	~UMessageDispatcherTG();
 
-	// Delegate
+	// Commands Delegates
 	FOnDroneMovementReceived OnDroneMovementReceived;
 	FOnDroneLookReceived OnDroneLookReceived;
+	// Snapshot Delegates
 
 	void AddReceivedMessage(FMessageTG&& ReceivedMsg);
 	void AddMessageToSend(FMessageTG&& ToSendMsg);
 
 	void ProcessMessagesReceived();
+	bool GetMessageToSend(FMessageTG& Message);
+
+	void ComposeSnapshotMessage(
+		RegId RegisterId,
+		FVector& Location,
+		FRotator& Rotation,
+		bool bDidDamage,
+		bool bDidKill,
+		bool bWasHit,
+		bool bWasKilled);
 private:
 	TQueue<FMessageTG> MessagesReceived;
 	TQueue<FMessageTG> MessagesToSend;

@@ -1,17 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ProjectileTG.h"
-#include "NiagaraComponent.h"
-#include "NiagaraSystem.h"
-#include "NiagaraFunctionLibrary.h"
-#include "GameFramework/GameModeBase.h"
+
 #include "Components/SphereComponent.h"
 #include "Components/MeshComponent.h"
 #include "Components/ShapeComponent.h"
 #include "Components/ArrowComponent.h"
+#include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
-#include "Tools/UtilsTG.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
+
 #include "TheGame/TheGame.h"
+#include "Base/CharacterTG.h"
+#include "Tools/UtilsTG.h"
 
 
 // Sets default values
@@ -59,13 +62,11 @@ void AProjectileTG::OnConstruction(const FTransform& InTransform)
 
 void AProjectileTG::SetupComponents()
 {
-	// Overlap-based collision
 	CollisionShape->SetCollisionProfileName(TEXT("Custom"));
 	CollisionShape->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	CollisionShape->SetGenerateOverlapEvents(true);
 	CollisionShape->SetCollisionResponseToAllChannels(ECR_Overlap);
 
-	// Optional but recommended
 	CollisionShape->SetCollisionObjectType(ECC_WorldDynamic); // Projectile channel
 	TRACE("Projectile collision response to pawn: %d", CollisionShape->GetCollisionResponseToChannel(ECC_Pawn))
 
@@ -96,7 +97,7 @@ void AProjectileTG::SetupComponents()
 void AProjectileTG::Activate()
 {
 	Super::Activate();
-	TRACE("Activating projectile...")
+	TRACE("Activating projectile...");
 	ProjectileMesh->AttachToComponent(
 		RootComponent,
 		FAttachmentTransformRules::SnapToTargetNotIncludingScale);
@@ -104,7 +105,7 @@ void AProjectileTG::Activate()
 
 void AProjectileTG::ResetMovement(FTransform const& Transform)
 {
-	TRACE("Resetting projectile movement")
+	TRACE("Resetting projectile movement");
 	ProjectileMovement->Velocity = 
 		Transform.GetRotation().GetForwardVector() * ProjectileMovement->InitialSpeed;
 }
@@ -121,7 +122,7 @@ void AProjectileTG::BeginPlay()
 {
 	Super::BeginPlay();
 	CollisionShape->OnComponentBeginOverlap.AddDynamic(this, &AProjectileTG::BeginOverlap);
-	TRACE("BeginOverlap has been binded")
+	TRACE("BeginOverlap has been binded");
 }
 
 void AProjectileTG::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -129,37 +130,72 @@ void AProjectileTG::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	const FHitResult& SweepResult)
 {
 	TRACE("OverlappedComponent: %s, OtherComponent: %s",
-		*OverlappedComponent->GetName(), *OtherComponent->GetName())
+		*OverlappedComponent->GetName(), *OtherComponent->GetName());
 	if (!OtherActor || OtherActor == GetOwner())
 	{
-		TRACEERROR("No other actor found!")
+		TRACEERROR("No other actor found!");
 		return;
 	}
 
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactParticles, GetActorLocation());
 	OnHit(OtherActor);
-	TRACE("Deactivating %s", *this->GetName())
+	TRACE("Deactivating %s", *this->GetName());
 	Super::Deactivate();
 }
 
 void AProjectileTG::OnHit(AActor* OtherActor)
 {
-	AController* PlayerController = nullptr;
+	AController* playerController = nullptr;
+	ACharacterTG* owningCharacter = nullptr;
 	if (GetInstigator())
 	{
-		PlayerController = GetInstigator()->GetController();
+		playerController = GetInstigator()->GetController();
+		owningCharacter = Cast<ACharacterTG>(GetInstigator());
 	}
 	else
 	{
-		TRACEERROR("No Instigator found!")
+		TRACEERROR("No Instigator found!");
+		return;
     }
-	if (PlayerController)
+	if (playerController)
 	{
-		TRACE("Applying damage: %f", BaseDamage)
-		UGameplayStatics::ApplyDamage(OtherActor, BaseDamage, PlayerController, this, DamageType);
+		TRACE("Applying damage: %f", BaseDamage);
+		UGameplayStatics::ApplyDamage(
+			OtherActor, BaseDamage, playerController, this, DamageType);
 	}
 	else
 	{
-		TRACEERROR("No PlayerController found!")
+		TRACEERROR("No PlayerController found!");
+		return;
     }
+	if (owningCharacter)
+	{
+		owningCharacter->OnHit(OtherActor);
+		ACharacterTG* otherCharacter = Cast<ACharacterTG>(OtherActor);
+		if (otherCharacter)
+		{
+			if (otherCharacter->HealthPoints <= 0)
+			{
+				owningCharacter->OnKill();
+				TRACE("%s character has killed %s!",
+					*otherCharacter->GetName(),
+					*owningCharacter->GetName());
+			}
+			else
+			{
+				TRACE("%s character has %f hp left",
+					*otherCharacter->GetName(),
+					otherCharacter->HealthPoints);
+			}
+		}
+		else
+		{
+			TRACE("otherCharacter is null!");
+		}
+	}
+	else
+	{
+		TRACEERROR("No OwningCharacter found!");
+		return;
+	}
 }

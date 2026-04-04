@@ -23,16 +23,13 @@ FControllerTG::~FControllerTG()
 
 void FControllerTG::HandleMove(const FInputActionValue& InputActionValue)
 {
-    TRACE("")
-    // Input is a Vector2D
-    // const FVector2D MovementVector = InputActionValue.Get<FVector2D>();
     const FVector MovementVector = InputActionValue.Get<FVector>();
+    TRACE("Movement X: %f / Y: %f", MovementVector.X, MovementVector.Y);
     if (GEngine)
-    {
+    { 
         GEngine->AddOnScreenDebugMessage(-1, 0.1f, FColor::Yellow,
             FString::Printf(TEXT(" %s"), *MovementVector.ToString()));
     }
-    // Add movement to the Player's Character Pawn
     if (ControlledCharacter)
     {
         ControlledCharacter->AddMovementInput(
@@ -44,9 +41,6 @@ void FControllerTG::HandleMove(const FInputActionValue& InputActionValue)
 
 void FControllerTG::HandleJump()
 {
-    // Input is 'Digital' (value not used here)
-
-    // Make the Player's Character Pawn jump, disabling crouch if it was active
     if (ControlledCharacter)
     {
         ControlledCharacter->UnCrouch();
@@ -56,9 +50,6 @@ void FControllerTG::HandleJump()
 
 void FControllerTG::HandleCrouch()
 {
-    // Input is 'Digital' (value not used here)
-
-    // Make the Player's Character Pawn crouch
     if (ControlledCharacter && ControlledCharacter->bIsCrouched)
     {
         ControlledCharacter->UnCrouch();

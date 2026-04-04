@@ -24,7 +24,11 @@ ACharacterTG::ACharacterTG():
 	HealthPoints{ 100.0 },
 	AttackPower{ 10.0 },
 	bIsDestroyable{ true },
-	bIsAI{ false }
+	bIsAI{ false },
+	bDidDamage{ false },
+	bDidKill{ false },
+	bWasHit{ false },
+	bWasKilled{ false }
 {
 	// Set this character to call Tick() every frame. 
 	// You can turn this off to improve performance if you don't need it.
@@ -65,16 +69,8 @@ ACharacterTG::ACharacterTG():
 	PythonCommunicationComponent =
 		CreateDefaultSubobject<UPythonCommunicationComponentTG>(TEXT("PythonCommunication"));
 
-	if (bIsAI)
-	{
-		AIControllerClass = AAIControllerTG::StaticClass();
-		AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-	}
-	else
-	{
-		PlayerController = 
-			CreateDefaultSubobject<APlayerControllerTG>(TEXT("PlayerController"));
-	}
+	AIControllerClass = AAIControllerTG::StaticClass();
+	AutoPossessAI = EAutoPossessAI::Disabled;
 
 	ThisCharacter = this;
 }
@@ -91,25 +87,57 @@ void ACharacterTG::BeginPlay()
 	}
 
 	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ACharacterTG::BeginOverlap);
-	TRACE("BeginOverlap has been binded")
+	TRACE("BeginOverlap has been binded");
 
+	//SpawnDefaultController();
 	if (bIsAI)
 	{
-		TRACE("Character %s is AI controlled", *ThisCharacter->GetName())
-		AIController = Cast<AAIControllerTG>(GetController());
-		if (!AIController) TRACEWARN("AIController is null!")
+		if (!GetController())
+		{
+			if (AIControllerClass)
+			{
+				AAIController* AI = GetWorld()->SpawnActor<AAIController>(AIControllerClass);
+				if (AI)
+				{
+					AI->Possess(this);
+					TRACE("Character %s is AI possessed", *ThisCharacter->GetName());
+				}
+				else
+				{
+					TRACEWARN("AIController is null!");
+				}
+			}
+			else
+			{
+				TRACEWARN("AIControllerClass is null!");
+			}
+		}
+		else
+		{
+			TRACEWARN("Character %s already has controller!", *ThisCharacter->GetName());
+		}
 	}
 	else
 	{
-		if (!PlayerController)
-			PlayerController = Cast<APlayerControllerTG>(GetController());
-		if (!PlayerController) TRACEWARN("PlayerController is null!")
-		if (!HUDClass) TRACEWARN("No HUDClass has been set!")
-		HUDWidget = CreateWidget<UCharacterHUDWidgetTG>(PlayerController, HUDClass);
-		if (HUDWidget) HUDWidget->AddToPlayerScreen();
-		else TRACEWARN("No HUDWidget has been set!");
+		APlayerControllerTG* playerController = Cast<APlayerControllerTG>(GetController());
+		if (playerController)
+		{
+			if (HUDClass)
+			{
+				HUDWidget = CreateWidget<UCharacterHUDWidgetTG>(playerController, HUDClass);
+				if (HUDWidget) HUDWidget->AddToPlayerScreen();
+				else TRACEWARN("No HUDWidget has been set!");
+			}
+			else
+			{
+				TRACEWARN("No HUDClass has been set!");
+			}
+		}
+		else
+		{
+			TRACEWARN("PlayerController is null!");
+		}
 	}
-
 	MaxHealth = HealthPoints;
 	OnHealthChanged(MaxHealth);
 }
@@ -151,7 +179,7 @@ void ACharacterTG::ShootProjectile() const
 
 	if (!GetWorld())
 	{
-		TRACEERROR("Could not get the world!")
+		TRACEERROR("Could not get the world!");
 		return;
 	}
 
@@ -178,7 +206,7 @@ void ACharacterTG::ShootProjectile() const
 		ECC_Visibility,
 		Params))
 	{
-		TRACE("AimPoint taken from hit!")
+		TRACE("AimPoint taken from hit!");
 		AimPoint = Hit.ImpactPoint;
 	}
 
@@ -194,7 +222,7 @@ void ACharacterTG::ShootProjectile() const
 	SpawnParams.Owner = ThisCharacter;
 	if (!ThisCharacter)
 	{
-		TRACEERROR("ThisCharacter not exists!")
+		TRACEERROR("ThisCharacter not exists!");
 		return;
 	}
 	// TODO: Setup SpawnParams like SpawnCollisionHandlingOverride or OverrideLevel
@@ -205,31 +233,47 @@ void ACharacterTG::ShootProjectile() const
 		FTransform(SpawnRotation, MuzzleLocation),
 		SpawnParams);
 	
-	TRACE("Created projectile")
+	TRACE("Created projectile");
 }
 
 void ACharacterTG::OnHealthChanged(float NewHealth)
 {
+	TRACE("");
 	if (HUDWidget)
 	{
 		HUDWidget->SetHealth(NewHealth, MaxHealth);
 	}
+	bWasHit = true;
 }
 
 void ACharacterTG::OnDeath()
 {
-	TRACE("%s character is dead!", *ThisCharacter->GetName())
+	TRACE("%s character is dead!", *ThisCharacter->GetName());
+	bWasKilled = true;
 	Destroy();
+}
+
+void ACharacterTG::OnHit(AActor* OtherActor)
+{
+	TRACE("%s character has hit %s",
+		*ThisCharacter->GetName(),
+		*OtherActor->GetName());
+	bDidDamage = true;
+}
+
+void ACharacterTG::OnKill()
+{
+	TRACE("%s character has killed someone", *ThisCharacter->GetName());
+	bDidKill = true;
 }
 
 float ACharacterTG::TakeDamage(
 	float DamageAmount,
-	struct FDamageEvent 
-	const& DamageEvent,
-	class AController* EventInstigator,
+	FDamageEvent const& DamageEvent,
+	AController* EventInstigator,
 	AActor* DamageCauser)
 {
-	TRACE("%s is taking damage: %f", *ThisCharacter->GetName(), DamageAmount)
+	TRACE("%s is taking damage: %f", *ThisCharacter->GetName(), DamageAmount);
 	if (!bIsDestroyable)
 		TRACE("%s character is immortal!", *ThisCharacter->GetName())
 	else

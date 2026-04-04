@@ -8,7 +8,7 @@ FMessageTG::FMessageTG() :
 	RegisterId{ 0 },
 	Type{ MsgType::None }
 {
-	TRACE("Default Constructor")
+	//TRACE("Default Constructor")
 }
 
 
@@ -16,10 +16,10 @@ FMessageTG::FMessageTG(RegId regId, MsgType msgType) :
 	RegisterId(regId),
 	Type(msgType)
 {
-	TRACE("Custom Constructor")
+	//TRACE("Custom Constructor")
 	if (MsgType::Register == Type)
 	{
-		TRACE("Preparing registration message with Reg Id: %d", RegisterId);
+		//TRACE("Preparing registration message with Reg Id: %d", RegisterId);
 		DataSignal.SetValue<uint8>(1);
 		DataSignal.Type = SignalValueType::UINT8;
 	}
@@ -30,7 +30,7 @@ FMessageTG::FMessageTG(const FMessageTG& other) :
 	Type(other.Type),
 	DataSignal(other.DataSignal)
 {
-	TRACE("Copy constructor")
+	//TRACE("Copy constructor")
 }
 
 FMessageTG::FMessageTG(FMessageTG&& other) :
@@ -38,12 +38,12 @@ FMessageTG::FMessageTG(FMessageTG&& other) :
 	Type(std::move(other.Type)),
 	DataSignal(MoveTemp(other.DataSignal))
 {
-	TRACE("Move constructor")
+	//TRACE("Move constructor")
 }
 
 FMessageTG& FMessageTG::operator=(const FMessageTG& other)
 {
-	TRACE("Copy operator=")
+	//TRACE("Copy operator=")
 	this->RegisterId = other.RegisterId;
 	this->Type = other.Type;
 	this->DataSignal = other.DataSignal;
@@ -52,7 +52,7 @@ FMessageTG& FMessageTG::operator=(const FMessageTG& other)
 
 FMessageTG& FMessageTG::operator=(FMessageTG&& other)
 {
-	TRACE("Move operator=")
+	//TRACE("Move operator=")
 	this->RegisterId = std::move(other.RegisterId);
 	this->Type = std::move(other.Type);
 	this->DataSignal = MoveTemp(other.DataSignal);
@@ -61,9 +61,8 @@ FMessageTG& FMessageTG::operator=(FMessageTG&& other)
 
 bool FMessageTG::Serialize(Payload& OutBuffer)
 {
-	TRACE("Reg Id: %d, Msg Type: %d", RegisterId, Type);
+	//TRACE("Reg Id: %d, Msg Type: %d", RegisterId, Type);
 	OutBuffer.Empty();
-	TRACE("RegisterId: %d", RegisterId);
 	OutBuffer.Append(ToBytes(RegisterId), sizeof(RegId));
 	OutBuffer.Append(ToBytes(Type), sizeof(MsgType));
 	if ( !DataSignal.Serialize(OutBuffer) )
@@ -77,22 +76,22 @@ bool FMessageTG::Serialize(Payload& OutBuffer)
 
 size_t FMessageTG::Deserialize(Payload& data, size_t startPos)
 {
-	TRACE("Deserializing %d bytes of data starting at position: %d", data.Num(), startPos);
-	TRACEBYTES(data.GetData(), data.Num())
-		if ((startPos + 2) > data.Num())
-		{
-			TRACEERROR("Read out of range of given data!");
-			return startPos;
-		}
+	//TRACE("Deserializing %d bytes of data starting at position: %d", data.Num(), startPos);
+	//TRACEBYTES(data.GetData(), data.Num())
+	//	if ((startPos + 2) > data.Num())
+	//	{
+	//		TRACEERROR("Read out of range of given data!");
+	//		return startPos;
+	//	}
 	size_t currBufPos = startPos;
 
 	FMemory::Memcpy(&RegisterId, data.GetData() + currBufPos, sizeof(RegId));
 	currBufPos += sizeof(RegId);
-	TRACE("RegisterId: %d Deserializing at position: %d", RegisterId, currBufPos);
+	//TRACE("RegisterId: %d Deserializing at position: %d", RegisterId, currBufPos);
 
 	FMemory::Memcpy(&Type, data.GetData() + currBufPos, sizeof(MsgType));
 	currBufPos += sizeof(MsgType);
-	TRACE("Type: %d Deserializing at position: %d", Type, currBufPos);
+	//TRACE("Type: %d Deserializing at position: %d", Type, currBufPos);
 
 	currBufPos = DataSignal.Deserialize(data, currBufPos);
 	return currBufPos;
