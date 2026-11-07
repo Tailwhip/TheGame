@@ -35,17 +35,19 @@ def debug_input(server: UE5Server, clients: Dict) -> None:
 
 def main():
     logger.debug(f"Drone Trainer has started")
+    server = None
+    signal_handler = SignalHandler()
+    signal.signal(signal.SIGINT, signal_handler)
+    if hasattr(signal, "SIGBREAK"):  # Windows: Ctrl+Break
+        signal.signal(signal.SIGBREAK, signal_handler)
     try:
         logger.debug(f"Starting UE communication server")
         server = UE5Server()
         server.start_server()
         time.sleep(5)
         clients = server.clients
-        
-        signal_handler = SignalHandler(server.stop_server)
-        signal.signal(signal.SIGINT, signal_handler)
 
-        while server.run:
+        while server.run and not signal_handler.stop_requested:
             debug_input(server, clients)
 
     except Exception as e:
@@ -54,7 +56,9 @@ def main():
         logger.error(f"Keyboard interrupted")
     finally:
         logger.debug(f"Finally...")
-                
+        if server is not None:
+            server.stop_server()
+
     logger.debug(f"Drone Trainer exit")
 
 

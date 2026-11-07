@@ -109,6 +109,11 @@ bool AAIControllerTG::RegisterDelegates()
 void AAIControllerTG::SendSnapshot()
 {
     TRACE("");
+    if (!CommunicationComponent)
+    {
+        TRACEERROR("CommunicationComponent is null!");
+        return;
+    }
     if (!CommunicationComponent->IsConnected())
     {
         TRACEERROR("CommunicationComponent is not connected!");

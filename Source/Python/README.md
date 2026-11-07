@@ -1,21 +1,15 @@
-# ML Forge
+# Drone Trainer
 
 ## Installation
 
 Upgrade pip:
 
-    $ pip install --upgrade pip
-
-Clone the repository:
-        
-    $ git clone 
-
-Move to the package directory:
-
-    $ cd ml_forge
+```
+pip install --upgrade pip
+```
 
 Install package:
 
-    $ pip install .
-
-## Usage
+```
+pip install .
+```

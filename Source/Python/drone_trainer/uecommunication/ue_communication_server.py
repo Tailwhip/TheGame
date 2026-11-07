@@ -3,20 +3,16 @@ import selectors
 import os
 import sys
 import argparse
-from threading import Thread, Lock
+from threading import Thread, RLock
 import traceback
 import struct
 from typing import Any, Dict
 from time import sleep
-from queue import Queue
+from queue import Queue, Empty
 
 from ..logger import logger
 from ..signal_handler import *
 from .message import *
-
-
-
-
 
 @dataclass(init=True, eq=True)
 class Client:
@@ -37,10 +33,14 @@ class UE5Server:
         self._max_clients = 10
         self._server_socket = st.socket(st.AF_INET, st.SOCK_DGRAM)
         self._clients = {}
-        self._mutex = Lock()
+        self._mutex = RLock()
+        self._stopped = False
 
     def __del__(self):
-        self.stop_server()
+        try:
+            self.stop_server()
+        except Exception:
+            pass
 
     @property
     def clients(self) -> Dict:
@@ -48,26 +48,26 @@ class UE5Server:
 
     def __lock_mutex(func) -> Any:
         def lock_mutex(self, *args, **kwargs):
-            self._mutex.acquire()
-            result = func(self, *args, **kwargs)
-            self._mutex.release()
-            return result
+            with self._mutex:
+                return func(self, *args, **kwargs)
         return lock_mutex
 
 
     def start_server(self) -> None:
         logger.debug("Starting the server's threads")
         self.run = True
-        self._server_socket.bind(("127.0.0.1", self._listening_port))
         self._server_socket.setsockopt(st.SOL_SOCKET, st.SO_REUSEADDR, 1)
+        self._server_socket.bind(("127.0.0.1", self._listening_port))
         self._server_socket.setblocking(False)
-        self._receiving_thread = Thread(target=self.__receiving_loop, args=[])
+        self._receiving_thread = Thread(
+            target=self.__receiving_loop, args=[], daemon=True)
         self._receiving_thread.start()
         sleep(0.5)
-        self._sending_thread = Thread(target=self.__sending_loop, args=[])
+        self._sending_thread = Thread(
+            target=self.__sending_loop, args=[], daemon=True)
         self._sending_thread.start()
-    
-    
+
+
     def __wait_for_connection(self):
         while self.run:
             logger.debug("Waiting for connection from clients...")
@@ -80,31 +80,41 @@ class UE5Server:
             sleep(STEP_TIME_S)
     
     
-    @__lock_mutex
     def stop_server(self):
-        logger.debug("Stopping the servers's thread")
-        for id in self._clients:
-            client = self._clients[id]
+        with self._mutex:
+            if self._stopped:
+                return
+            self._stopped = True
+            self.run = False
+            logger.debug("Stopping the server's threads")
+            clients = list(self._clients.values())
+
+        for client in clients:
+            logger.debug(f"Stopping client: {client.id}")
             self.send_data(
                 address=client.address,
                 message=Message(
                     client_id=client.id,
                     message_type=msg_type["Unregister"],
                     signal=Signal(1, 0, 0x01)))
-        self.run = False
+
+        for name, thread in (("sending", self._sending_thread),
+                             ("receiving", self._receiving_thread)):
+            if thread.is_alive():
+                logger.debug(f"Joining {name} thread")
+                thread.join(timeout=5 * STEP_TIME_S)
+                if thread.is_alive():
+                    logger.warning(f"{name} thread did not stop in time")
+
         try:
-            logger.debug("Joining sending thread")
-            self._sending_thread.join()
-            logger.debug("Joining receiving thread")
-            self._receiving_thread.join()
             self._server_socket.close()
         except Exception as e:
-            logger.warning(f"An exception has occured: {e}")
+            logger.warning(f"An exception has occured while closing: {e}")
+        logger.debug("Server stopped")
         
         
     @__lock_mutex
     def receive_data(self):
-        logger.debug("")
         data = b'\x00'
         address = ("", 0)
         try:
@@ -112,8 +122,12 @@ class UE5Server:
             if not data:
                 logger.debug("No data received")
                 return False, data, address
-        except Exception as e:
-            logger.error(f"An exception has occured: {e}")
+        except BlockingIOError:
+            # Non-blocking socket with nothing queued: this is normal.
+            return False, data, address
+        except OSError as e:
+            if self.run:
+                logger.error(f"An exception has occured: {e}")
             return False, data, address
         return True, data, address
 
@@ -177,17 +191,18 @@ class UE5Server:
 
 
     def __sending_loop(self):
-        logger.debug("")
         while self.run:
-            sleep(STEP_TIME_S)
-            message = self.sending_queue.get()
-            client = self._clients[message.client_id]
-            if client.id and message.message_type != 0:
+            try:
+                message = self.sending_queue.get(timeout=STEP_TIME_S)
+            except Empty:
+                continue
+            client = self._clients.get(message.client_id)
+            if client is not None and client.id and message.message_type != 0:
                 self.send_data(client.address, message)
                 logger.debug("Data has been sent")
             else:
                 logger.warning(
-                    f"Client {client.id} is unregistered or message to send is empty!")
+                    f"Client {message.client_id} is unregistered or message to send is empty!")
 
 
     def __connect_to_client(self, host = "127.0.0.1", port = 6969):
