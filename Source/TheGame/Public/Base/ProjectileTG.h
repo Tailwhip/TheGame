@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ActorTG.h"
+#include "Base/ActorTG.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "ProjectileTG.generated.h"
 

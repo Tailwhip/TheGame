@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "ProjectileTG.h"
+#include "Base/ProjectileTG.h"
 #include "CharacterTG.generated.h"
 
 

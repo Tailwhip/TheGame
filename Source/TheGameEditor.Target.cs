@@ -8,8 +8,8 @@ public class TheGameEditorTarget : TargetRules
 	public TheGameEditorTarget( TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Editor;
-		DefaultBuildSettings = BuildSettingsVersion.V6;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_7;
+		DefaultBuildSettings = BuildSettingsVersion.V7;  // NOTE: Change this when upgrading UE!
+		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_8;  // NOTE: Change this when upgrading UE!
 		ExtraModuleNames.Add("TheGame");
 	}
 }

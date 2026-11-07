@@ -1,5 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
+using System;
+using System.IO;
 using UnrealBuildTool;
 
 public class TheGame : ModuleRules
@@ -7,7 +9,7 @@ public class TheGame : ModuleRules
 	public TheGame(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-	
+
 		PublicDependencyModuleNames.AddRange(new string[] 
 		{ 
 			"Core", "CoreUObject", "Engine", "InputCore", 
@@ -19,21 +21,26 @@ public class TheGame : ModuleRules
 			"Sockets", "Networking"
 		});
 		
+    string pyVersion = "314"; // NOTE: Change this when upgrading Python!
+    string moduleDir = ModuleDirectory;
+    string publicDir = moduleDir + "\\Public";
+    string localDir = Environment.GetFolderPath(
+        Environment.SpecialFolder.LocalApplicationData
+    );
+    string pythonDir = localDir + "\\Programs\\Python\\Python" + pyVersion + "\\";
+    Console.WriteLine("moduleDir: " + moduleDir);
+    Console.WriteLine("publicDir: " + publicDir);
+    Console.WriteLine("localDir: " + localDir);
+    Console.WriteLine("pythonDir: " + pythonDir);
 		PublicIncludePaths.AddRange(new string[]
 		{
-			// TODO: Make dirs independent
-			"C:/Users/Taail/AppData/Local/Programs/Python/Python312/include",
-            "C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Actors",
-            "C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Base",
-			"C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Base/Controller",
-            "C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Pooling",
-			"C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/PythonCommunication",
-            "C:/Users/Taail/Documents/Unreal Projects/TheGame/Source/TheGame/Public/Tools"
-        });
+			publicDir,
+			pythonDir + "\\include"
+    });
 		
 		PublicAdditionalLibraries.AddRange(new string[]
 		{
-			"C:/Users/Taail/AppData/Local/Programs/Python/Python312/libs/python312.lib"
+			pythonDir + "\\libs\\python" + pyVersion + ".lib"
 		});
 		
 		bEnableUndefinedIdentifierWarnings = false;
