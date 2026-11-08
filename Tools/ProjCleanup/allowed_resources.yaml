@@ -7,5 +7,6 @@ directories:
   - Config
   - Content
   - Source
-  - Scripts
-  - venv
+  - Saved/Config/WindowsEditor
+  - Tools
+  - .venv

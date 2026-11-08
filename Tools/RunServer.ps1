@@ -38,7 +38,7 @@ function Main {
 
         Activate-Venv
 
-        drone_trainer.exe
+        agent_trainer.exe
     }
     catch {
         Write-Host "Running failed: $_" -ForegroundColor Red

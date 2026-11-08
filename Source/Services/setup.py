@@ -10,7 +10,7 @@ from setuptools import setup
 
 
 def get_version():
-    filename = "./drone_trainer/__init__.py"
+    filename = "./agent_trainer/__init__.py"
     with open(filename) as f:
         match = re.search(
             r"""^__version__ = ['"]([^'"]*)['"]""", f.read(), re.M
@@ -46,7 +46,7 @@ def main():
     version = get_version()
 
     setup(
-        name="drone_trainer",
+        name="agent_trainer",
         version=version,
         packages=find_packages(),
         description="NN models pipelines creator.",
@@ -65,10 +65,10 @@ def main():
             "Programming Language :: Python",
             "Programming Language :: Python :: 3.8",
         ],
-        package_data={"drone_trainer": ["icons/*", "config/*.yaml"]},
+        package_data={"agent_trainer": ["icons/*", "config/*.yaml"]},
         entry_points={
             "console_scripts": [
-                "drone_trainer=drone_trainer.__main__:main"
+                "agent_trainer=agent_trainer.__main__:main"
                 # "clf=ml_forge.cli.classification:main",
             ],
         },

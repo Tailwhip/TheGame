@@ -6,14 +6,14 @@ import time
 import struct
 from typing import Dict
 
-from .uecommunication.ue_communication_server import UE5Server
-from .uecommunication.message \
+from .tgcommunication.tg_communication_server import TgServer
+from .tgcommunication.protocol \
     import Message, msg_type, value_type, Signal, STEP_TIME_S
 from .signal_handler import *
 from .logger import logger
 
 
-def debug_input(server: UE5Server, clients: Dict) -> None:
+def debug_input(server: TgServer, clients: Dict) -> None:
     time.sleep(STEP_TIME_S)
     for i, id in enumerate(clients):
         client = clients[id]
@@ -42,7 +42,7 @@ def main():
         signal.signal(signal.SIGBREAK, signal_handler)
     try:
         logger.debug(f"Starting UE communication server")
-        server = UE5Server()
+        server = TgServer()
         server.start_server()
         time.sleep(5)
         clients = server.clients

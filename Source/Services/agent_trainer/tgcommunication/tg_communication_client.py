@@ -11,7 +11,7 @@ from ..logger import logger
 from ..signal_handler import *
 
 
-class UE5Client:
+class TgClient:
     def __init__(self):
         self.run = False
         self._data = None
@@ -22,12 +22,12 @@ class UE5Client:
         self.run = True
         self._thread = threading.Thread(target=self.__client_loop, args=[])
         self._thread.start()
-        
+
     def stop_client(self):
         logger.info("Stopping the client's thread")
         self.run = False
         self._thread.join()
-    
+
     def __connect_to_server(self, host = "127.0.0.1", port = 7777):
         # Starts the client
         logger.info("Connecting to server...")
@@ -58,4 +58,3 @@ class UE5Client:
             sleep(1)
             data = "Hello The Game!"
             self.send_data(data)
-

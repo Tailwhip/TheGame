@@ -6,23 +6,39 @@ import argparse
 from threading import Thread, RLock
 import traceback
 import struct
-from typing import Any, Dict
+from typing import Any, Callable, Concatenate, ParamSpec, TypeVar
 from time import sleep
 from queue import Queue, Empty
+from functools import wraps
 
 from ..logger import logger
 from ..signal_handler import *
-from .message import *
+from .protocol import *
+
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def lock_mutex(
+    func: Callable[Concatenate[Any, P], R],
+) -> Callable[Concatenate[Any, P], R]:
+    """Serialize calls to ``func`` using the instance's ``_mutex`` lock."""
+    @wraps(func)
+    def _lock_mutex(self: Any, *args: P.args, **kwargs: P.kwargs) -> R:
+        with self._mutex:
+            return func(self, *args, **kwargs)
+
+    return _lock_mutex
+
 
 @dataclass(init=True, eq=True)
 class Client:
     id: int = 0
     address: tuple[str, int]=("", 0)
     is_registered: bool = False
-    message_to_send: Message = Message
-    
+    message_to_send: Message = Message()
 
-class UE5Server:
+class TgServer:
     def __init__(self):
         self.run = False
         self.sending_queue = Queue()
@@ -36,22 +52,17 @@ class UE5Server:
         self._mutex = RLock()
         self._stopped = False
 
+
     def __del__(self):
         try:
             self.stop_server()
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(f"An error has occured while stopping server: {e}")
+
 
     @property
     def clients(self) -> Dict:
         return self._clients
-
-    def __lock_mutex(func) -> Any:
-        def lock_mutex(self, *args, **kwargs):
-            with self._mutex:
-                return func(self, *args, **kwargs)
-        return lock_mutex
-
 
     def start_server(self) -> None:
         logger.debug("Starting the server's threads")
@@ -68,18 +79,6 @@ class UE5Server:
         self._sending_thread.start()
 
 
-    def __wait_for_connection(self):
-        while self.run:
-            logger.debug("Waiting for connection from clients...")
-            # configure how many client the server can listen simultaneously
-            # self._server_socket.listen(self._max_clients)
-            client = Client()
-            # client.connection, client.address = self._server_socket.accept()  # accept new connection
-            self._clients[client.id] = client
-            logger.debug("Connection from: " + str(client.address))
-            sleep(STEP_TIME_S)
-    
-    
     def stop_server(self):
         with self._mutex:
             if self._stopped:
@@ -113,7 +112,7 @@ class UE5Server:
         logger.debug("Server stopped")
         
         
-    @__lock_mutex
+    @lock_mutex
     def receive_data(self):
         data = b'\x00'
         address = ("", 0)
@@ -147,7 +146,7 @@ class UE5Server:
             logger.debug("Received data from connected user: " + str(data))   
     
 
-    def __handle_new_message(self, address: any, message: Message):
+    def __handle_new_message(self, address: Any, message: Message):
         logger.debug("")
         client = Client()
         if msg_type["Register"] == message.message_type:
@@ -175,7 +174,7 @@ class UE5Server:
                 f"Client {client.address} with id {client.id} is unregistered!")
         
             
-    @__lock_mutex
+    @lock_mutex
     def send_data(self, address, message: Message=None):
         if (message is not None):
             data_bytes = message.serialize()
